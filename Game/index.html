@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vocab Quest</title>
+  
+  <!-- Load React, ReactDOM, Babel, and Tailwind CSS directly into the browser -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- VOCABULARY DATABASE (500 Words for 11+) - Version 5 ---
+    const rawVocabData = [
+  // LEVEL 1 (50 Words)
+  "1|Abandon|To leave someone or something behind entirely.|The crew had to abandon the sinking ship to save themselves.|Desert, Leave, Dump",
+  "1|Baffle|To completely confuse or puzzle someone.|The complex math riddle will completely baffle anyone who tries it.|Confuse, Puzzle, Perplex",
+  "1|Cease|To bring or come to an end; stop.|The factory will cease production of the old toy next month.|Stop, Halt, End",
+  "1|Dawdle|To waste time or move very slowly.|If you dawdle on your way to school, you will be late.|Linger, Dally, Delay",
+  "1|Eager|Very keen or excited to do something.|The children were eager to open their presents on Christmas morning.|Keen, Enthusiastic, Anxious",
+  "1|Falter|To lose strength, momentum, or hesitate.|Her confidence began to falter when she forgot her lines on stage.|Hesitate, Stumble, Waver",
+  "1|Gather|To bring together into one group or place.|We need to gather wood before we can start the campfire.|Collect, Assemble, Accumulate",
+  "1|Habit|A regular practice or usual behavior.|Brushing your teeth twice a day is a very healthy habit.|Routine, Pattern, Custom",
+  "1|Ideal|Perfect, or the best possible standard.|A sunny day with a light breeze is ideal weather for a picnic.|Perfect, Flawless, Optimal",
+  "1|Jolly|Happy, cheerful, and full of fun.|Santa Claus is known for being a jolly man in a red suit.|Cheerful, Merry, Joyful",
+  "1|Keen|Having or showing eagerness or enthusiasm.|He is a keen reader who visits the library every weekend.|Eager, Enthusiastic, Sharp",
+  "1|Labor|Hard physical or mental work.|Building the Great Wall of China required years of intense labor.|Work, Toil, Effort",
+  "1|Mainly|For the most part; mostly.|The book is mainly about a boy who discovers a magical world.|Mostly, Primarily, Chiefly",
+  "1|Noble|Belonging to a high social class or having fine personal qualities.|The knight performed a noble deed by rescuing the trapped villagers.|Honorable, Virtuous, Aristocratic",
+  "1|Obey|To do what you are told to do.|You must obey the traffic lights to stay safe on the roads.|Comply, Follow, Submit",
+  "1|Pardon|To forgive or excuse someone for a mistake.|I beg your pardon, I didn't mean to bump into you.|Forgive, Excuse, Absolve",
+  "1|Quaint|Attractively unusual or old-fashioned.|They stayed in a quaint little cottage with a thatched roof.|Charming, Old-fashioned, Picturesque",
+  "1|Rare|Not occurring or found very often.|That blue diamond is incredibly rare and very valuable.|Uncommon, Scarce, Infrequent",
+  "1|Sacred|Connected with God or dedicated to a religious purpose.|The ancient temple is considered sacred by the local people.|Holy, Divine, Blessed",
+  "1|Tame|Not dangerous or frightened of people; domesticated.|The zoo keeper managed to tame the wild horse over several weeks.|Domesticated, Docile, Gentle",
+  "1|Upset|Unhappy, disappointed, or worried.|She was very upset when her favorite toy broke.|Distressed, Agitated, Troubled",
+  "1|Vague|Unclear, uncertain, or lacking detail.|His directions were so vague that we ended up getting lost.|Unclear, Indistinct, Hazy",
+  "1|Wander|To walk or move in a leisurely or aimless way.|We decided to wander through the forest and look at the trees.|Roam, Stroll, Meander",
+  "1|Yield|To produce or provide (an agricultural or industrial product).|The apple orchard will yield a huge crop this autumn.|Produce, Generate, Surrender",
+  "1|Zeal|Great energy or enthusiasm in pursuit of a cause or an objective.|He tackled the charity project with immense zeal.|Enthusiasm, Passion, Fervor",
+  "1|Abode|A place of residence; a house or home.|Welcome to my humble abode.|Home, Residence, Dwelling",
+  "1|Abstract|Existing in thought or as an idea.|Love is an abstract concept.|Theoretical, Conceptual",
+  "1|Abundance|A very large quantity of something.|There was an abundance of food at the feast.|Plenty, Wealth",
+  "1|Acclaim|Enthusiastic and public praise.|The new movie received critical acclaim.|Praise, Applause",
+  "1|Accolade|An award or privilege granted as a special honor.|He received the highest accolade for his bravery.|Award, Honor",
+  "1|Accommodate|To provide lodging or sufficient space for.|The hotel can accommodate up to 500 guests.|House, Shelter",
+  "1|Accompany|To go somewhere with someone as a companion.|I will accompany you to the train station.|Escort, Guide",
+  "1|Achieve|To successfully bring about or reach a desired objective.|She worked hard to achieve her goals.|Attain, Reach",
+  "1|Address|To speak to a person or group.|The mayor will address the crowd today.|Speak, Talk",
+  "1|Adhere|To stick fast to a surface or substance.|The glue will help the paper adhere to the wall.|Stick, Cling",
+  "1|Adjacent|Next to or adjoining something else.|Our house is adjacent to the local park.|Next, Bordering",
+  "1|Admission|A statement acknowledging the truth of something.|His admission of guilt shocked everyone.|Confession, Acceptance",
+  "1|Admonish|To warn or reprimand someone firmly.|The teacher had to admonish the noisy students.|Scold, Reprimand",
+  "1|Adopt|To choose to take up or follow an idea, method, or course of action.|The school will adopt a new uniform policy.|Embrace, Take on",
+  "1|Adverse|Preventing success or development; harmful.|The game was canceled due to adverse weather conditions.|Unfavorable, Bad",
+  "1|Aggressive|Ready or likely to attack or confront.|The aggressive dog growled at the strangers.|Hostile, Belligerent",
+  "1|Agitate|To make someone troubled or nervous.|The loud noises began to agitate the baby.|Upset, Disturb",
+  "1|Aid|Help, typically of a practical nature.|They gathered supplies to aid the flood victims.|Help, Assist",
+  "1|Albeit|Although.|He was making progress, albeit rather slowly.|Although, Even though",
+  "1|Allure|The quality of being powerfully and mysteriously attractive.|The allure of hidden treasure led them to the cave.|Attraction, Charm",
+  "1|Amateur|A person who engages in a pursuit on an unpaid basis.|The race was won by an unknown amateur.|Beginner, Nonprofessional",
+  "1|Ambrosial|Exceptionally pleasing to taste or smell.|The bakery was filled with ambrosial scents.|Delicious, Heavenly",
+  "1|Ample|Enough or more than enough; plentiful.|There is ample room for everyone in the hall.|Plentiful, Abundant",
+  "1|Antiquated|Old-fashioned or outdated.|They replaced the antiquated computers with modern ones.|Outdated, Obsolete",
+  "1|Apathy|Lack of interest, enthusiasm, or concern.|His apathy towards his homework resulted in bad grades.|Indifference, Unconcern",
+
+  // LEVEL 2 (50 Words)
+  "2|Abolish|To formally put an end to a system, practice, or institution.|The government decided to abolish the unfair tax laws.|Eliminate, Eradicate, Annul",
+  "2|Banish|To send someone away from a place as an official punishment.|The king chose to banish the traitor from the kingdom forever.|Exile, Expel, Deport",
+  "2|Calamity|An event causing great and often sudden damage or distress.|The earthquake was a terrible calamity for the small town.|Disaster, Catastrophe, Tragedy",
+  "2|Deceive|To deliberately cause someone to believe something that is not true.|The villain tried to deceive the hero with a clever disguise.|Trick, Mislead, Cheat",
+  "2|Earnest|Resulting from or showing sincere and intense conviction.|He made an earnest promise to always tell the truth.|Sincere, Serious, Solemn",
+  "2|Fatigue|Extreme tiredness resulting from mental or physical exertion.|After running the marathon, she collapsed from exhaustion and fatigue.|Exhaustion, Weariness, Tiredness",
+  "2|Grievance|A real or imagined wrong or other cause for complaint.|The workers filed a grievance about the unsafe conditions.|Complaint, Injustice, Grudge",
+  "2|Hoard|A hidden stock of valued goods or money.|The dragon slept on top of a massive hoard of gold.|Stash, Stockpile, Reserve",
+  "2|Ignoble|Not honorable in character or purpose.|Cheating on a test is an ignoble thing to do.|Dishonorable, Shameful, Base",
+  "2|Jubilant|Feeling or expressing great happiness and triumph.|The fans were jubilant when their team won the cup.|Overjoyed, Triumphant, Thrilled",
+  "2|Knack|An acquired or natural skill at performing a task.|She has a real knack for solving difficult puzzles quickly.|Skill, Talent, Flair",
+  "2|Lament|A passionate expression of grief or sorrow.|The poet wrote a sad lament for his lost friend.|Mourn, Grieve, Wail",
+  "2|Malice|The intention or desire to do evil or cause harm.|He broke her favorite vase out of pure malice.|Spite, Ill-will, Vengeance",
+  "2|Nimble|Quick and light in movement or action.|The nimble gymnast easily jumped over the high bar.|Agile, Quick, Spry",
+  "2|Obstinate|Stubbornly refusing to change one's opinion or chosen course of action.|The obstinate donkey refused to move an inch.|Stubborn, Inflexible, Headstrong",
+  "2|Peculiar|Strange or odd; unusual.|That animal has a peculiar habit of sleeping upside down.|Strange, Odd, Unusual",
+  "2|Quench|To satisfy one's thirst by drinking.|A glass of ice water will perfectly quench your thirst on a hot day.|Satisfy, Extinguish, Slake",
+  "2|Radiant|Sending out light; shining or glowing brightly.|The bride looked radiant in her beautiful white dress.|Shining, Glowing, Brilliant",
+  "2|Savage|Fierce, violent, and uncontrolled.|The explorer was attacked by a savage beast in the jungle.|Fierce, Wild, Untamed",
+  "2|Tact|Sensitivity in dealing with others or with difficult issues.|The teacher used great tact to explain the student's mistakes kindly.|Diplomacy, Sensitivity, Discretion",
+  "2|Unruly|Disorderly and disruptive and not amenable to discipline or control.|The unruly crowd pushed past the security guards.|Disorderly, Wild, Unmanageable",
+  "2|Valiant|Possessing or showing courage or determination.|The valiant knight fought bravely against the dragon.|Brave, Courageous, Heroic",
+  "2|Wary|Feeling or showing caution about possible dangers or problems.|You should be wary of strangers offering you free things.|Cautious, Careful, Suspicious",
+  "2|Yearn|Have an intense feeling of longing for something.|When she was away at camp, she began to yearn for her home.|Long, Desire, Crave",
+  "2|Zenith|The time at which something is most powerful or successful.|The Roman Empire peaked at its zenith before slowly declining.|Peak, Pinnacle, Apex",
+  "2|Appreciate|To recognize the full worth of.|I really appreciate all your help today.|Value, Treasure",
+  "2|Apprehensive|Anxious or fearful that something bad will happen.|She felt apprehensive about the upcoming exam.|Anxious, Nervous",
+  "2|Arduous|Involving or requiring strenuous effort; difficult and tiring.|Climbing the steep mountain was an arduous journey.|Difficult, Hard",
+  "2|Argument|An exchange of diverging or opposite views.|They had a heated argument about what game to play.|Dispute, Disagreement",
+  "2|Arid|Having little or no rain; too dry or barren.|Cacti thrive in the hot, arid desert.|Dry, Parched",
+  "2|Artful|Clever or skillful, typically in a crafty way.|The artful thief easily picked the lock.|Crafty, Sly",
+  "2|Articulate|Having the ability to speak fluently and coherently.|The articulate student gave a brilliant presentation.|Eloquent, Fluent",
+  "2|Artisan|A worker in a skilled trade, especially making things by hand.|The artisan crafted a beautiful wooden bowl.|Craftsman, Creator",
+  "2|Ashamed|Embarrassed or guilty because of one's actions.|He felt ashamed for breaking his brother's toy.|Sorry, Guilty",
+  "2|Assemble|To gather together in one place for a common purpose.|The students will assemble in the main hall.|Gather, Collect",
+  "2|Asunder|Apart; divided.|The mighty storm tore the old ship asunder.|Apart, Divided",
+  "2|Attempt|An effort to achieve or complete a difficult task.|She made a brave attempt to climb the wall.|Try, Effort",
+  "2|Augur|To portend a good or bad outcome.|The dark clouds augur a heavy thunderstorm.|Predict, Foretell",
+  "2|Austerity|Sternness or severity of manner or attitude.|The headmaster's austerity frightened the new pupils.|Severity, Strictness",
+  "2|Aversion|A strong dislike or disinclination.|He has a strong aversion to eating broccoli.|Dislike, Hatred",
+  "2|Avoid|To keep away from or stop oneself from doing.|You should avoid walking near the edge of the cliff.|Evade, Dodge",
+  "2|Avuncular|Kind and friendly toward a younger or less experienced person.|The avuncular old man gave the children sweets.|Friendly, Kind",
+  "2|Barbaric|Cruel and fiercely uncultured.|The gladiators fought in a barbaric and brutal manner.|Cruel, Savage",
+  "2|Because|For the reason that.|We stayed indoors because it was raining heavily.|Since, As",
+  "2|Beck|A gesture of the hand or head to encourage someone to approach.|The servant was at the king's beck and call.|Call, Command",
+  "2|Becoming|Flattering a person's appearance.|That blue dress is very becoming on you.|Flattering, Attractive",
+  "2|Bedfellow|A person connected with another in a particular activity.|Politics makes for strange bedfellows.|Associate, Partner",
+  "2|Bemoan|To express discontent or sorrow over.|He began to bemoan his lack of free time.|Lament, Mourn",
+  "2|Benefit|An advantage or profit gained from something.|Eating vegetables has a great benefit to your health.|Advantage, Good",
+  "2|Benign|Gentle and kindly.|The benign doctor smiled warmly at the patient.|Kind, Friendly",
+
+  // LEVEL 3 (50 Words)
+  "3|Abundant|Existing or available in large quantities; plentiful.|The farmer was pleased with the abundant harvest this year.|Plentiful, Copious, Ample",
+  "3|Benevolent|Well meaning and kindly.|The benevolent old man donated a lot of money to the local school.|Kind, Generous, Compassionate",
+  "3|Coax|To gently and persistently persuade someone to do something.|He tried to coax the frightened cat down from the tree with a treat.|Persuade, Wheedle, Cajole",
+  "3|Diligent|Having or showing care and conscientiousness in one's work.|She was a diligent student who always did her homework carefully.|Hardworking, Industrious, Careful",
+  "3|Elude|To evade or escape from a danger, enemy, or pursuer.|The clever thief managed to elude the police by hiding in an alley.|Evade, Escape, Dodge",
+  "3|Frugal|Sparing or economical with regard to money or food.|Because they were poor, they had to be frugal and save every penny.|Thrifty, Economical, Sparing",
+  "3|Gregarious|Fond of company; sociable.|Dolphins are gregarious animals that love to swim in large pods.|Sociable, Outgoing, Friendly",
+  "3|Haughty|Arrogantly superior and disdainful.|The haughty prince looked down on the poor villagers.|Arrogant, Proud, Snobbish",
+  "3|Impartial|Treating all rivals or disputants equally; fair and just.|A referee must remain impartial and not favor either team.|Fair, Neutral, Unbiased",
+  "3|Jeopardy|Danger of loss, harm, or failure.|His careless mistake put the entire mission in jeopardy.|Danger, Peril, Risk",
+  "3|Kindle|To light or set on fire; to arouse or inspire.|The teacher tried to kindle a love of reading in her students.|Ignite, Spark, Arouse",
+  "3|Lucid|Expressed clearly; easy to understand.|The instructions were so lucid that everyone knew exactly what to do.|Clear, Comprehensible, Plain",
+  "3|Meager|Lacking in quantity or quality.|The prisoners were given a meager portion of dry bread and water.|Scanty, Inadequate, Sparse",
+  "3|Novice|A person new to or inexperienced in a field or situation.|Since I am just a novice at chess, I easily lost to the champion.|Beginner, Learner, Rookie",
+  "3|Ominous|Giving the impression that something bad is going to happen.|The dark, ominous clouds meant a severe storm was coming.|Threatening, Menacing, Foreboding",
+  "3|Placid|Not easily upset or excited; calm and peaceful.|The placid lake perfectly reflected the surrounding mountains.|Calm, Peaceful, Tranquil",
+  "3|Queasy|Nauseated; feeling sick.|The bumpy rollercoaster ride made him feel quite queasy.|Nauseous, Sick, Squeamish",
+  "3|Reluctant|Unwilling and hesitant; disinclined.|She was reluctant to lend her favorite book to her brother.|Unwilling, Hesitant, Loath",
+  "3|Subtle|So delicate or precise as to be difficult to analyze or describe.|There was a subtle hint of garlic in the tomato sauce.|Faint, Delicate, Understated",
+  "3|Tranquil|Free from disturbance; calm.|The tranquil garden was the perfect place to sit and relax quietly.|Peaceful, Serene, Calm",
+  "3|Unique|Being the only one of its kind; unlike anything else.|Every snowflake is unique and has its own special pattern.|Distinctive, Singular, Exclusive",
+  "3|Vivid|Producing powerful feelings or strong, clear images in the mind.|She had a vivid dream that felt completely real.|Clear, Bright, Graphic",
+  "3|Wane|To decrease in vigor, power, or extent; become weaker.|As the night went on, his energy began to wane.|Diminish, Decline, Fade",
+  "3|Yoke|A wooden crosspiece fastened over the necks of two animals.|The farmer placed the yoke on the oxen so they could pull the cart.|Harness, Collar, Burden",
+  "3|Zest|Great enthusiasm and energy.|He approached every new challenge with boundless zest.|Enthusiasm, Vigor, Energy",
+  "3|Betray|To be disloyal to.|The spy decided to betray his own country.|Deceive, Cheat",
+  "3|Bewildered|Perplexed and confused; very puzzled.|The bewildered tourist asked for directions to the museum.|Confused, Puzzled",
+  "3|Biased|Unfairly prejudiced for or against someone or something.|A referee must never be biased during a match.|Prejudiced, Partial",
+  "3|Blissful|Extremely happy; full of joy.|They spent a blissful afternoon relaxing on the beach.|Joyful, Happy",
+  "3|Blunder|A stupid or careless mistake.|Sending the email to the wrong person was a huge blunder.|Mistake, Error",
+  "3|Bolster|To support or strengthen.|He drank coffee to bolster his energy levels.|Strengthen, Support",
+  "3|Bravado|A bold manner or a show of boldness intended to impress.|Behind his swaggering bravado, he was actually quite scared.|Boldness, Swagger",
+  "3|Brawn|Physical strength in contrast to intelligence.|The heavy lifting required more brawn than brain.|Strength, Muscle",
+  "3|Brusque|Abrupt or offhand in speech or manner.|The busy waiter gave a brusque reply and hurried away.|Abrupt, Blunt",
+  "3|Cache|A collection of items of the same type stored in a hidden place.|The pirates buried their cache of gold on the island.|Hoard, Stash",
+  "3|Candidate|A person who applies for a job or is nominated for election.|She was the best candidate for the manager role.|Applicant, Nominee",
+  "3|Career|An occupation undertaken for a significant period of a person's life.|He enjoyed a long and successful career as a doctor.|Profession, Job",
+  "3|Charismatic|Exercising a compelling charm that inspires devotion.|The charismatic leader easily won the crowd's support.|Charming, Magnetic",
+  "3|Charming|Pleasant or attractive.|They stayed in a charming little cottage in the woods.|Delightful, Appealing",
+  "3|Charred|Burned and blackened.|The toast was completely charred after being left in the oven.|Burned, Blackened",
+  "3|Coerce|To persuade an unwilling person to do something by using force.|The bully tried to coerce the boy into giving up his lunch.|Force, Compel",
+  "3|Coherent|Logical and consistent.|She presented a coherent and easy-to-understand argument.|Logical, Clear",
+  "3|Colloquial|Used in ordinary or familiar conversation; not formal.|'Gonna' and 'wanna' are colloquial expressions.|Informal, Conversational",
+  "3|Combination|A joining or merging of different parts.|The recipe uses a perfect combination of sweet and sour flavors.|Mixture, Blend",
+  "3|Comical|Amusing, especially in a ludicrous or absurd way.|The clown's oversized shoes looked highly comical.|Funny, Humorous",
+  "3|Commemorate|To recall and show respect for someone or something.|The statue was built to commemorate the brave soldiers.|Remember, Honor",
+  "3|Compel|To force or oblige someone to do something.|The strong evidence will compel the jury to find him guilty.|Force, Coerce",
+  "3|Complex|Consisting of many different and connected parts.|The human brain is an incredibly complex organ.|Complicated, Intricate",
+  "3|Compliance|The action of complying with a wish or command.|Strict compliance with the safety rules is mandatory.|Obedience, Agreement",
+  "3|Comrade|A companion who shares one's activities or is a fellow member.|The soldier refused to leave his injured comrade behind.|Companion, Friend",
+
+  // LEVEL 4 (50 Words)
+  "4|Accomplice|A person who helps another commit a crime.|The thief was caught, but his accomplice managed to run away.|Partner, Associate, Collaborator",
+  "4|Boisterous|Noisy, energetic, and cheerful; rowdy.|The boisterous children ran around the playground shouting loudly.|Noisy, Rowdy, Energetic",
+  "4|Conceal|To keep from sight; hide.|He tried to conceal the surprise present behind his back.|Hide, Cover, Mask",
+  "4|Deplete|To use up the supply or resources of.|Long droughts severely deplete the water supply in the reservoir.|Exhaust, Drain, Consume",
+  "4|Enigma|A person or thing that is mysterious, puzzling, or difficult to understand.|How the ancient pyramids were built remains a fascinating enigma.|Mystery, Puzzle, Riddle",
+  "4|Fictitious|Not real or true, being imaginary or having been fabricated.|The characters in the story are completely fictitious and not based on real people.|Imaginary, Made-up, False",
+  "4|Grueling|Extremely tiring and demanding.|The marathon is a grueling race that tests a runner's endurance.|Exhausting, Punishing, Demanding",
+  "4|Hostile|Unfriendly; antagonistic.|The stray dog gave a hostile growl when I approached.|Unfriendly, Aggressive, Belligerent",
+  "4|Inevitable|Certain to happen; unavoidable.|Since they never practiced, their defeat in the final was inevitable.|Unavoidable, Inescapable, Certain",
+  "4|Jovial|Cheerful and friendly.|The jovial host greeted every guest with a wide smile and a warm hug.|Cheerful, Jolly, Merry",
+  "4|Kinship|Blood relationship; a sharing of characteristics or origins.|They felt a strong kinship because they shared the same unusual hobby.|Affinity, Connection, Relation",
+  "4|Linger|To stay in a place longer than necessary.|She decided to linger in the park to watch the sunset.|Loiter, Dawdle, Stay",
+  "4|Momentous|Of great importance or significance.|The signing of the peace treaty was a momentous occasion for the country.|Significant, Historic, Crucial",
+  "4|Nostalgia|A sentimental longing or wistful affection for the past.|Looking at old family photos always fills him with a sense of nostalgia.|Reminiscence, Longing, Homesickness",
+  "4|Obsolete|No longer produced or used; out of date.|Typewriters became obsolete once computers were invented.|Outdated, Antiquated, Extinct",
+  "4|Peril|Serious and immediate danger.|The sailors were in great peril when the fierce storm hit their ship.|Danger, Hazard, Risk",
+  "4|Quiver|To tremble or shake with a slight rapid motion.|Her lip began to quiver when she realized she had lost her ticket.|Tremble, Shake, Shiver",
+  "4|Replenish|To fill something up again.|The hikers stopped at the stream to replenish their water bottles.|Refill, Restock, Restore",
+  "4|Somber|Dark or dull in color or tone; gloomy.|Everyone at the funeral wore dark, somber clothing.|Gloomy, Solemn, Serious",
+  "4|Trivial|Of little value or importance.|They wasted hours arguing over trivial details instead of doing the work.|Unimportant, Insignificant, Minor",
+  "4|Unanimous|Fully in agreement.|The jury reached a unanimous decision that the man was innocent.|United, Agreed, Undivided",
+  "4|Versatile|Able to adapt or be adapted to many different functions or activities.|A Swiss Army knife is a highly versatile tool.|Adaptable, Flexible, Multipurpose",
+  "4|Whimsical|Playfully quaint or fanciful, especially in an appealing and amusing way.|The artist painted a whimsical picture of flying pigs and purple trees.|Fanciful, Playful, Quirky",
+  "4|Yielding|Complying with the requests or desires of others.|The yielding manager agreed to give his staff the afternoon off.|Compliant, Accommodating, Submissive",
+  "4|Zephyr|A soft gentle breeze.|A warm summer zephyr gently rustled the leaves of the trees.|Breeze, Draft, Wind",
+  "4|Conceited|Excessively proud of oneself; vain.|The conceited actor couldn't stop looking in the mirror.|Vain, Proud",
+  "4|Conclusion|The end or finish of an event or process.|The exciting movie reached a dramatic conclusion.|End, Finish",
+  "4|Conclusive|Serving to prove a case; decisive.|The fingerprint was conclusive proof that he was there.|Decisive, Definite",
+  "4|Concur|To be of the same opinion; agree.|The doctors concur that she needs plenty of rest.|Agree, Assent",
+  "4|Condemn|To express complete disapproval of, typically in public.|The community will condemn the cruel actions of the criminal.|Criticize, Blame",
+  "4|Condone|To accept and allow wrong behavior to continue.|The school cannot condone bullying of any kind.|Allow, Overlook",
+  "4|Conducive|Making a certain situation or outcome likely or possible.|A quiet room is conducive to studying effectively.|Favorable, Helpful",
+  "4|Confiscated|Taken or seized with authority.|The teacher confiscated the mobile phone during the lesson.|Seized, Taken",
+  "4|Conjecture|An opinion or conclusion formed on the basis of incomplete information.|Without facts, your theory is pure conjecture.|Guess, Speculation",
+  "4|Consent|Permission for something to happen or agreement to do something.|You must get your parents' consent to go on the trip.|Permission, Agreement",
+  "4|Consequently|As a result.|He didn't study, and consequently failed the test.|Therefore, Thus",
+  "4|Consideration|Careful thought, typically over a period of time.|After much consideration, she chose the blue car.|Thought, Deliberation",
+  "4|Conspire|To make secret plans jointly to commit an unlawful act.|The villains conspire to steal the royal crown.|Plot, Scheme",
+  "4|Consume|To eat, drink, or ingest.|A growing lion will consume a large amount of meat.|Eat, Devour",
+  "4|Contagious|Spread from one person or organism to another by contact.|A common cold is a highly contagious illness.|Infectious, Catching",
+  "4|Contemporary|Living or occurring at the same time.|The museum features a stunning collection of contemporary art.|Modern, Current",
+  "4|Contrast|The state of being strikingly different from something else.|The white snow provided a sharp contrast to the dark trees.|Difference, Disparity",
+  "4|Contrite|Feeling or expressing remorse or penitence.|The contrite child apologized for breaking the window.|Sorry, Remorseful",
+  "4|Conundrum|A confusing and difficult problem or question.|Figuring out the riddle proved to be a real conundrum.|Puzzle, Mystery",
+  "4|Convict|To declare someone to be guilty of a criminal offense.|The judge will convict the thief based on the evidence.|Sentence, Condemn",
+  "4|Cordial|Warm and friendly.|The host gave us a very cordial welcome to the party.|Friendly, Warm",
+  "4|Covet|To yearn to possess or have something.|I secretly covet my best friend's shiny new bicycle.|Desire, Crave",
+  "4|Coy|Making a pretense of shyness or modesty that is intended to be alluring.|She gave him a coy smile from across the room.|Shy, Bashful",
+  "4|Crass|Lacking sensitivity, refinement, or intelligence.|His crass jokes offended everyone at the formal dinner.|Insensitive, Vulgar",
+  "4|Credit|The ability of a customer to obtain goods or services before payment.|He bought the expensive television on credit.|Trust, Loan",
+
+  // LEVEL 5 (50 Words)
+  "5|Adamant|Refusing to be persuaded or to change one's mind.|He was adamant that he had not eaten the last cookie.|Resolute, Unshakable, Stubborn",
+  "5|Blemish|A small mark or flaw which spoils the appearance of something.|There was a tiny blemish on the skin of the perfect red apple.|Flaw, Defect, Spot",
+  "5|Candid|Truthful and straightforward; frank.|I want you to be candid and tell me honestly what you think of my painting.|Frank, Honest, Outspoken",
+  "5|Desolate|Deserted of people and in a state of bleak and dismal emptiness.|After the town was abandoned, it became a desolate wasteland.|Barren, Empty, Bleak",
+  "5|Eccentric|Unconventional and slightly strange.|The eccentric inventor wore mismatched shoes and talked to himself.|Unconventional, Odd, Quirky",
+  "5|Flaw|A mark, fault, or other imperfection.|The only flaw in his plan was that he forgot to bring a map.|Defect, Blemish, Fault",
+  "5|Gullible|Easily persuaded to believe something; credulous.|My gullible brother believed me when I told him the moon was made of cheese.|Credulous, Naive, Trusting",
+  "5|Hinder|To create difficulties for someone or something, resulting in delay.|The heavy snow will hinder the rescue team's progress.|Impede, Obstruct, Delay",
+  "5|Illustrious|Well known, respected, and admired for past achievements.|The illustrious scientist was awarded a Nobel Prize for her discoveries.|Eminent, Distinguished, Renowned",
+  "5|Jubilation|A feeling of great happiness and triumph.|There was widespread jubilation when the war finally ended.|Joy, Exultation, Triumph",
+  "5|Luminous|Full of or shedding light; bright or shining.|The moon cast a luminous glow over the dark ocean.|Radiant, Glowing, Brilliant",
+  "5|Meticulous|Showing great attention to detail; very careful and precise.|She is a meticulous cleaner who leaves no corner un-dusted.|Careful, Exact, Thorough",
+  "5|Notorious|Famous or well known, typically for some bad quality or deed.|The notorious pirate Blackbeard was feared across the seven seas.|Infamous, Scandalous, Disreputable",
+  "5|Oppressive|Unjustly inflicting hardship and constraint.|The dictator ruled his country with an oppressive and cruel regime.|Harsh, Cruel, Tyrannical",
+  "5|Pristine|In its original condition; unspoiled.|The explorer was the first to set foot on the pristine, untouched island.|Immaculate, Spotless, Pure",
+  "5|Quandary|A state of perplexity or uncertainty over what to do in a difficult situation.|I am in a quandary about whether to go to the party or stay home and study.|Dilemma, Predicament, Fix",
+  "5|Rigorous|Extremely thorough, exhaustive, or accurate.|The athletes underwent a rigorous training program to prepare for the Olympics.|Strict, Severe, Thorough",
+  "5|Scrutinize|To examine or inspect closely and thoroughly.|The detective had to scrutinize the crime scene for tiny clues.|Examine, Inspect, Study",
+  "5|Tenacious|Tending to keep a firm hold of something; clinging or adhering closely.|The tenacious climber refused to let go of the rock, despite his exhaustion.|Firm, Persistent, Resolute",
+  "5|Unprecedented|Never done or known before.|The internet has allowed information to spread at an unprecedented speed.|Unparalleled, Unknown, Unmatched",
+  "5|Vigilant|Keeping careful watch for possible danger or difficulties.|The security guard must remain vigilant throughout the night.|Watchful, Observant, Alert",
+  "5|Wrath|Extreme anger.|He hid from the dragon to avoid its fiery wrath.|Anger, Rage, Fury",
+  "5|Yearning|A feeling of intense longing for something.|She felt a deep yearning to travel and see the world.|Longing, Craving, Desire",
+  "5|Appetite|A natural desire to satisfy a bodily need, especially for food.|Swimming in the cold ocean gave him a huge appetite.|Hunger, Craving, Taste",
+  "5|Belligerent|Hostile and aggressive.|The belligerent customer yelled loudly at the poor cashier.|Hostile, Aggressive, Pugnacious",
+  "5|Cunning|Having or showing skill in achieving one's ends by deceit or evasion.|The cunning fox managed to steal the farmer's chickens.|Sly, Crafty",
+  "5|Curb|To restrain or keep in check.|You must learn to curb your anger when things go wrong.|Restrain, Control",
+  "5|Curious|Eager to know or learn something.|The curious kitten sniffed at the strange new toy.|Inquisitive, Intrigued",
+  "5|Curt|Rudely brief.|His curt reply showed that he was annoyed by the question.|Abrupt, Blunt",
+  "5|Dazzling|Extremely bright, especially so as to blind the eyes temporarily.|She wore a dazzling diamond necklace to the ball.|Brilliant, Shining",
+  "5|Debate|A formal discussion on a particular topic.|The politicians held a lively debate on live television.|Discussion, Argument",
+  "5|Decline|To politely refuse an invitation or offer.|I must decline your offer because I am too busy.|Refuse, Reject",
+  "5|Definite|Clearly stated or decided; not vague or doubtful.|We need a definite answer by tomorrow morning.|Clear, Certain",
+  "5|Defy|To openly resist or refuse to obey.|The brave rebel dared to defy the cruel king's orders.|Resist, Oppose",
+  "5|Deject|To make sad or dispirited; depress.|Failing the important exam will deeply deject him.|Depress, Sadden",
+  "5|Deluge|A severe flood.|A sudden deluge of rain flooded the streets in minutes.|Flood, Torrent",
+  "5|Demolish|To pull or knock down a building.|The builders will demolish the old factory tomorrow.|Destroy, Wreck",
+  "5|Demure|Reserved, modest, and shy.|The demure young lady sat quietly in the corner.|Modest, Shy",
+  "5|Depict|To show or represent by a drawing, painting, or other art form.|The cave paintings depict ancient hunting scenes.|Draw, Portray",
+  "5|Desist|To cease; abstain.|The police officer ordered the crowd to desist from shouting.|Stop, Cease",
+  "5|Destitute|Without the basic necessities of life.|The terrible fire left the poor family completely destitute.|Poor, Penniless",
+  "5|Develop|To grow or cause to grow and become more mature, advanced, or elaborate.|A small seed will develop into a massive oak tree.|Grow, Evolve",
+  "5|Devise|To plan or invent a complex procedure, system, or mechanism.|They need to devise a clever plan to escape the maze.|Invent, Plan",
+  "5|Devour|To eat food hungrarily or quickly.|The hungry wolves will quickly devour their prey.|Eat, Consume",
+  "5|Diction|The choice and use of words and phrases in speech or writing.|The poet's clear diction made the poem easy to understand.|Phrasing, Wording",
+  "5|Digest|To break down food in the stomach.|A snake can take days to fully digest a large meal.|Absorb, Process",
+  "5|Digress|To leave the main subject temporarily in speech or writing.|I have a tendency to digress when I tell long stories.|Wander, Stray",
+  "5|Diluted|Made thinner or weaker by adding water or another solvent.|The orange squash was too strong, so he diluted it with water.|Watered-down, Weakened",
+  "5|Dim|Not shining brightly or clearly.|The dim candlelight made it hard to read the book.|Faint, Weak",
+  "5|Diminish|To make or become less.|The pain in his leg began to diminish after taking medicine.|Decrease, Reduce",
+
+  // LEVEL 6 (50 Words)
+  "6|Amiable|Having or displaying a friendly and pleasant manner.|The amiable shopkeeper always greeted her customers with a big smile.|Friendly, Affable, Pleasant",
+  "6|Brevity|Concise and exact use of words in writing or speech.|Because we only have five minutes, the brevity of your speech is important.|Conciseness, Shortness, Terseness",
+  "6|Callous|Showing or having an insensitive and cruel disregard for others.|The callous thief stole money from the charity box without feeling guilty.|Heartless, Insensitive, Cruel",
+  "6|Daunting|Seeming difficult to deal with in anticipation; intimidating.|Climbing Mount Everest is a daunting task for even the best mountaineers.|Intimidating, Formidable, Overwhelming",
+  "6|Eloquent|Fluent or persuasive in speaking or writing.|She gave an eloquent speech that moved everyone in the audience to tears.|Expressive, Articulate, Fluent",
+  "6|Frivolous|Not having any serious purpose or value.|He spent his entire allowance on frivolous things like arcade games and candy.|Flippant, Senseless, Trivial",
+  "6|Garrulous|Excessively talkative, especially on trivial matters.|The garrulous passenger next to me on the plane wouldn't stop chatting.|Talkative, Loquacious, Voluble",
+  "6|Hypocrisy|The practice of claiming to have moral standards to which one's own behavior does not conform.|It is pure hypocrisy for him to tell us to save the environment while he drops litter.|Deceit, Two-facedness, Insincerity",
+  "6|Impeccable|In accordance with the highest standards; faultless.|The butler's manners were absolutely impeccable.|Flawless, Perfect, Spotless",
+  "6|Judicious|Having, showing, or done with good judgment or sense.|It is judicious to save some of your money instead of spending it all at once.|Wise, Prudent, Sensible",
+  "6|Lethargic|Affected by lethargy; sluggish and apathetic.|The hot, humid weather made everyone feel tired and lethargic.|Sluggish, Inert, Inactive",
+  "6|Morose|Sullen and ill-tempered.|After losing the match, he sat in the corner looking gloomy and morose.|Sullen, Sulky, Gloomy",
+  "6|Nuance|A subtle difference in or shade of meaning, expression, or sound.|The actor's performance captured every tiny nuance of the character's sadness.|Subtlety, Degree, Variation",
+  "6|Ostentatious|Characterized by vulgar or pretentious display.|He drove an ostentatious gold car to show off his wealth.|Showy, Pretentious, Flamboyant",
+  "6|Prolific|Present in large numbers or quantities; plentiful.|Shakespeare was a prolific writer who produced dozens of plays and poems.|Productive, Abundant, Fruitful",
+  "6|Quagmire|An awkward, complex, or hazardous situation.|The project became a quagmire of rules and regulations that slowed us down.|Muddle, Predicament, Tangle",
+  "6|Resilient|Able to withstand or recover quickly from difficult conditions.|Children are often incredibly resilient and bounce back quickly from illnesses.|Tough, Hardy, Buoyant",
+  "6|Sporadic|Occurring at irregular intervals or only in a few places.|We heard sporadic gunfire echoing from the distant hills.|Occasional, Infrequent, Irregular",
+  "6|Trepidation|A feeling of fear or agitation about something that may happen.|She approached the haunted house with great trepidation.|Fear, Apprehension, Dread",
+  "6|Ubiquitous|Present, appearing, or found everywhere.|Mobile phones have become completely ubiquitous in modern society.|Omnipresent, Universal, Pervasive",
+  "6|Voracious|Wanting or devouring great quantities of food or information.|He is a voracious reader who gets through three books a week.|Insatiable, Unquenchable, Greedy",
+  "6|Wane|To decrease in power or size.|As the storm passed, the fierce winds began to wane.|Diminish, Decline, Fade",
+  "6|Abstain|To restrain oneself from doing or enjoying something.|During his diet, he had to abstain from eating chocolate.|Refrain, Desist, Forbear",
+  "6|Brazen|Bold and without shame.|The brazen thief walked right into the bank without wearing a mask.|Bold, Shameless, Audacious",
+  "6|Clandestine|Kept secret or done secretively, especially because illicit.|The spies held a clandestine meeting in the dark basement.|Secret, Covert, Stealthy",
+  "6|Discredit|To harm the good reputation of someone or something.|The newspaper tried to discredit the honest mayor.|Defame, Slander",
+  "6|Dishevelled|Untidy; disordered.|He woke up looking totally dishevelled with messy hair.|Untidy, Messy",
+  "6|Disinterested|Not influenced by considerations of personal advantage.|A judge must be completely disinterested when hearing a case.|Unbiased, Impartial",
+  "6|Dismal|Depressing; dreary.|The dismal grey weather ruined our trip to the seaside.|Gloomy, Dreary",
+  "6|Disperse|To distribute or spread over a wide area.|The wind will disperse the dandelion seeds across the field.|Scatter, Spread",
+  "6|Divine|Of, from, or like God or a god.|The ancient Greeks believed lightning was a sign of divine anger.|Holy, Heavenly",
+  "6|Docile|Ready to accept control or instruction; submissive.|The normally fierce dog was surprisingly docile with the baby.|Obedient, Tame",
+  "6|Dogmatic|Inclined to lay down principles as incontrovertibly true.|The dogmatic teacher refused to listen to other opinions.|Strict, Rigid",
+  "6|Domestic|Relating to the running of a home or to family relations.|Washing dishes is a necessary domestic chore.|Household, Family",
+  "6|Dormant|Having normal physical functions suspended or slowed down for a period of time.|The dormant volcano hasn't erupted in hundreds of years.|Sleeping, Inactive",
+  "6|Dose|A quantity of a medicine or drug taken at a particular time.|The doctor prescribed a strong dose of cough syrup.|Amount, Portion",
+  "6|Doubtful|Feeling uncertain about something.|I am highly doubtful that it will snow in the middle of summer.|Uncertain, Unsure",
+  "6|Dour|Relentlessly severe, stern, or gloomy in manner or appearance.|The dour security guard never smiled at anyone.|Stern, Severe",
+  "6|Draconian|Excessively harsh and severe.|The king imposed draconian punishments for even minor crimes.|Harsh, Severe",
+  "6|Dutiful|Conscientiously or obediently fulfilling one's duty.|The dutiful knight followed his king's orders perfectly.|Obedient, Loyal",
+  "6|Egoistical|Excessively conceited or absorbed in oneself; self-centered.|The egoistical singer only talked about her own talent.|Selfish, Vain",
+  "6|Elementary|Relating to the most rudimentary aspects of a subject.|Adding two plus two is an elementary math problem.|Basic, Simple",
+  "6|Eloquence|Fluent or persuasive speaking or writing.|His natural eloquence made him a fantastic debater.|Fluency, Articulacy",
+  "6|Elucidate|To make something clear; explain.|Please elucidate your theory so the class can understand.|Explain, Clarify",
+  "6|Embargo|An official ban on trade or other commercial activity with a particular country.|The country placed a strict embargo on importing foreign cars.|Ban, Restriction",
+  "6|Embrace|To hold someone closely in one's arms, especially as a sign of affection.|The mother ran to embrace her returning son.|Hug, Hold",
+  "6|Empire|An extensive group of states or countries under a single supreme authority.|The Roman Empire stretched across much of Europe.|Kingdom, Realm",
+  "6|Emulate|To match or surpass a person or achievement, typically by imitation.|The young boy tried to emulate his older brother's success.|Imitate, Copy",
+  "6|Endorse|To declare one's public approval or support of.|The famous athlete was paid to endorse the new sports shoe.|Support, Approve",
+  "6|Endure|To suffer something painful or difficult patiently.|The explorers had to endure freezing temperatures in the Arctic.|Suffer, Withstand",
+
+  // LEVEL 7 (50 Words)
+  "7|Alleviate|To make suffering, deficiency, or a problem less severe.|Taking this medicine should help alleviate your headache.|Relieve, Ease, Lessen",
+  "7|Banal|So lacking in originality as to be obvious and boring.|The movie's plot was so banal that I could guess the ending in five minutes.|Trite, Cliched, Ordinary",
+  "7|Capricious|Given to sudden and unaccountable changes of mood or behavior.|The capricious weather went from sunny to hailing in just ten minutes.|Fickle, Inconstant, Unpredictable",
+  "7|Derive|To obtain something from a specified source.|Many medicines we use today derive from plants found in the rainforest.|Obtain, Get, Acquire",
+  "7|Enthrall|To capture the fascinated attention of.|The magician's incredible tricks managed to enthrall the entire audience.|Captivate, Charm, Fascinate",
+  "7|Fastidious|Very attentive to and concerned about accuracy and detail.|The fastidious artist spent hours perfecting the smallest stroke of paint.|Meticulous, Scrupulous, Punctilious",
+  "7|Gratuitous|Uncalled for; lacking good reason; unwarranted.|The extra violence in the movie was completely gratuitous and unnecessary.|Unjustified, Unprovoked, Needless",
+  "7|Impetuous|Acting or done quickly and without thought or care.|His impetuous decision to quit his job meant he had no money for rent.|Impulsive, Rash, Hasty",
+  "7|Juxtapose|To place or deal with close together for contrasting effect.|The museum decided to juxtapose modern art right next to ancient artifacts.|Compare, Contrast, Collocate",
+  "7|Loquacious|Tending to talk a great deal; talkative.|The loquacious tour guide talked continuously for the entire two-hour trip.|Talkative, Voluble, Garrulous",
+  "7|Magnanimous|Very generous or forgiving, especially toward a rival.|In a magnanimous gesture, the winner praised the runner-up's incredible skill.|Generous, Charitable, Forgiving",
+  "7|Nefarious|Wicked or criminal (typically of an action or activity).|The nefarious villain plotted to steal the city's entire gold reserve.|Wicked, Evil, Villainous",
+  "7|Obfuscate|To render obscure, unclear, or unintelligible.|The politician tried to obfuscate the truth by using complicated, confusing words.|Obscure, Confuse, Blur",
+  "7|Paradigm|A typical example or pattern of something; a model.|Her successful business model became the new paradigm for the entire industry.|Model, Pattern, Example",
+  "7|Quintessential|Representing the most perfect or typical example of a quality or class.|The cozy cottage with a roaring fire was the quintessential country home.|Typical, Classic, Ideal",
+  "7|Reticent|Not revealing one's thoughts or feelings readily.|He was reticent about his past and rarely spoke about his family.|Reserved, Withdrawn, Introverted",
+  "7|Sycophant|A person who acts obsequiously toward someone important to gain advantage.|The sycophant constantly complimented the king just to get rich rewards.|Toady, Flatterer, Yes-man",
+  "7|Taciturn|Reserved or uncommunicative in speech; saying little.|The taciturn old cowboy simply nodded instead of answering my question.|Untalkative, Quiet, Mute",
+  "7|Vacillate|To alternate or waver between different opinions or actions; be indecisive.|If you vacillate too long on the menu, the restaurant will close.|Waver, Hesitate, Dither",
+  "7|Whimsical|Playfully quaint or fanciful.|Her whimsical clothing style included colorful striped socks and top hats.|Fanciful, Playful, Quirky",
+  "7|Aberration|A departure from what is normal, usual, or expected.|A snowstorm in the middle of July is a complete aberration.|Anomaly, Deviation, Abnormality",
+  "7|Cacophony|A harsh, discordant mixture of sounds.|The loud construction work created a terrible cacophony that gave me a headache.|Din, Racket, Noise",
+  "7|Dearth|A scarcity or lack of something.|There is a concerning dearth of fresh water in the desert region.|Lack, Scarcity, Shortage",
+  "7|Ebullient|Cheerful and full of energy.|She felt highly ebullient after finding out she got full marks on the test.|Exuberant, Buoyant, Joyful",
+  "7|Facetious|Treating serious issues with deliberately inappropriate humor.|Please stop being facetious when we are discussing safety rules.|Flippant, Glued, Frivolous",
+  "7|Enterprise|A project or undertaking, typically one that is difficult or requires effort.|Building a colony on Mars is a massive enterprise.|Venture, Project",
+  "7|Enthuse|To say something that expresses one's eager enjoyment, interest, or approval.|She began to enthuse over her brilliant exam results.|Rave, Gush",
+  "7|Entire|With no part left out; whole.|He was so hungry he ate the entire pizza by himself.|Whole, Complete",
+  "7|Equivocate|To use ambiguous language so as to conceal the truth or avoid committing oneself.|When asked directly, the politician began to equivocate.|Prevaricate, Dodge",
+  "7|Era|A long and distinct period of history with a particular feature or characteristic.|The Victorian era brought huge changes to industry.|Period, Age",
+  "7|Erect|Rigidly upright or straight.|The soldiers stood erect as the general walked past.|Upright, Straight",
+  "7|Erratic|Not even or regular in pattern or movement; unpredictable.|The bat flew in an erratic, zigzag pattern across the room.|Unpredictable, Irregular",
+  "7|Especially|Used to single out one person, thing, or situation over all others.|I love all chocolate, especially the dark kind.|Particularly, Specifically",
+  "7|Etiquette|The customary code of polite behavior in society.|It is bad etiquette to chew with your mouth open.|Manners, Protocol",
+  "7|Exaggerate|To represent something as being larger, better, or worse than it really is.|He tends to exaggerate how big the fish he caught was.|Overstate, Embellish",
+  "7|Exclaim|To cry out suddenly, especially in surprise, anger, or pain.|She couldn't help but exclaim in joy when she won the prize.|Cry out, Shout",
+  "7|Fact|A thing that is indisputably the case.|It is a scientific fact that the Earth revolves around the sun.|Truth, Reality",
+  "7|Famine|Extreme scarcity of food.|The long drought caused a terrible famine across the region.|Starvation, Scarcity",
+  "7|Fatal|Causing death.|The brave knight struck a fatal blow to the fearsome dragon.|Deadly, Lethal",
+  "7|Faux|Made in imitation; artificial.|She wore a glamorous faux fur coat to the party.|Fake, Artificial",
+  "7|Feeble|Lacking physical strength, especially as a result of age or illness.|The old dog let out a weak and feeble bark.|Weak, Frail",
+  "7|Feign|To pretend to be affected by a feeling, state, or injury.|The smart player will feign an injury to stop the clock.|Pretend, Fake",
+  "7|Fiasco|A thing that is a complete failure, especially in a ludicrous or humiliating way.|The poorly planned party turned into a total fiasco.|Disaster, Catastrophe",
+  "7|Figment|A thing that someone believes to be real but that exists only in their imagination.|The monster under the bed is just a figment of your imagination.|Illusion, Creation",
+  "7|Figurative|Departing from a literal use of words; metaphorical.|'Raining cats and dogs' is a figurative expression.|Metaphorical, Symbolic",
+  "7|Flamboyant|Tending to attract attention because of their exuberance, confidence, and stylishness.|The flamboyant singer wore a glittery jacket and bright pink sunglasses.|Showy, Ostentatious",
+  "7|Flattering|Full of praise and compliments.|He made several flattering remarks about her beautiful painting.|Complimentary, Praising",
+  "7|Flawed|Blemished, damaged, or imperfect in some way.|The detective realized the witness's flawed story didn't make sense.|Imperfect, Defective",
+  "7|Flawless|Without any blemishes or imperfections; perfect.|The gymnast performed a truly flawless routine on the bars.|Perfect, Unblemished",
+  "7|Flee|To run away from a place or situation of danger.|The villagers had to flee when the volcano began to erupt.|Escape, Run",
+
+  // LEVEL 8 (50 Words)
+  "8|Acquiesce|To accept something reluctantly but without protest.|Though he didn't want to go to the ballet, he decided to acquiesce to make her happy.|Consent, Comply, Yield",
+  "8|Bourgeois|Of or characteristic of the middle class, typically with reference to its perceived materialistic values.|They lived a comfortable, bourgeois lifestyle in a quiet suburban neighborhood.|Middle-class, Conventional, Materialistic",
+  "8|Chicanery|The use of trickery to achieve a political, financial, or legal purpose.|The corrupt politician was found guilty of financial chicanery.|Trickery, Deception, Subterfuge",
+  "8|Deleterious|Causing harm or damage.|Smoking cigarettes has a highly deleterious effect on your lungs.|Harmful, Damaging, Detrimental",
+  "8|Epiphany|A moment of sudden revelation or insight.|While washing the dishes, he had an epiphany about how to solve the difficult maths equation.|Revelation, Insight, Realization",
+  "8|Facilitate|To make an action or process easy or easier.|The new ramp will facilitate wheelchair access to the building.|Ease, Assist, Help",
+  "8|Galvanize|To shock or excite someone into taking action.|The inspiring speech helped to galvanize the crowd into protesting the new law.|Spur, Motivate, Stimulate",
+  "8|Harangue|A lengthy and aggressive speech.|The angry headmaster gave a terrifying harangue about school behavior.|Tirade, Diatribe, Rant",
+  "8|Iconoclast|A person who attacks cherished beliefs or institutions.|The daring artist was an iconoclast who mocked traditional painting rules.|Critic, Skeptic, Maverick",
+  "8|Jejune|Naive, simplistic, and superficial.|His jejune remarks showed that he didn't really understand the serious topic.|Naive, Simple, Childish",
+  "8|Kowtow|To act in an excessively subservient manner.|The employees had to kowtow to the demanding boss out of fear of losing their jobs.|Grovel, Pander, Fawn",
+  "8|Laissez-faire|A policy or attitude of letting things take their own course.|The government took a laissez-faire approach and let businesses regulate themselves.|Non-interference, Hands-off, Relaxed",
+  "8|Mendacious|Not telling the truth; lying.|The mendacious witness gave completely false evidence in court.|Lying, Untruthful, False",
+  "8|Nonchalant|Feeling or appearing casually calm and relaxed.|Despite the extreme danger, the spy remained cool and nonchalant.|Calm, Cool, Unconcerned",
+  "8|Omnipotent|Having unlimited power; able to do anything.|In Greek mythology, Zeus is considered an almost omnipotent god.|All-powerful, Supreme, Invincible",
+  "8|Panacea|A solution or remedy for all difficulties or diseases.|Unfortunately, there is no magical panacea to instantly cure poverty.|Cure-all, Elixir, Magic bullet",
+  "8|Quotidian|Of or occurring every day; daily.|Washing the dishes is a boring but necessary quotidian task.|Daily, Everyday, Ordinary",
+  "8|Recalcitrant|Having an obstinately uncooperative attitude toward authority.|The recalcitrant teenager refused to listen to his parents or his teachers.|Uncooperative, Rebellious, Defiant",
+  "8|Serendipity|The occurrence and development of events by chance in a happy or beneficial way.|By pure serendipity, I bumped into my best friend while on holiday in Spain.|Chance, Luck, Fluke",
+  "8|Tantamount|Equivalent in seriousness to; virtually the same as.|Leaving a dog in a hot car is tantamount to animal cruelty.|Equivalent, Equal, Synonymous",
+  "8|Usurp|To take a position of power or importance illegally or by force.|The evil brother tried to usurp the throne while the king was ill.|Seize, Take over, Overthrow",
+  "8|Vehement|Showing strong feeling; forceful, passionate, or intense.|She made a vehement denial when accused of cheating.|Passionate, Forceful, Intense",
+  "8|Abstemious|Not self-indulgent, especially when eating and drinking.|The monks lived an abstemious life, eating only plain rice and vegetables.|Temperate, Restrained, Moderate",
+  "8|Bowdlerize|To remove material that is considered improper or offensive from a text.|The publisher decided to bowdlerize the classic novel to make it suitable for young children.|Censor, Expurgate, Purify",
+  "8|Circumlocution|The use of many words where fewer would do.|Instead of just saying 'no', the politician used endless circumlocution to dodge the question.|Wordiness, Verbosity, Waffle",
+  "8|Fleet|Fast and nimble in movement.|The fleet runner easily won the 100-meter dash.|Fast, Quick",
+  "8|Flimsy|Comparatively light and insubstantial; easily damaged.|The flimsy paper umbrella broke in the heavy wind.|Fragile, Weak",
+  "8|Flippant|Not showing a serious or respectful attitude.|His flippant remark during the serious assembly got him in trouble.|Frivolous, Disrespectful",
+  "8|Flora|The plants of a particular region, habitat, or geological period.|The botanist studied the unique flora of the Amazon rainforest.|Plants, Vegetation",
+  "8|Flourish|To grow or develop in a healthy or vigorous way.|The plants will flourish if they get enough sunlight and water.|Thrive, Grow",
+  "8|Foe|An enemy or opponent.|In the story, the brave hero faces a powerful and evil foe.|Enemy, Adversary",
+  "8|Forebear|An ancestor.|Our ancient forebear painted these amazing pictures on the cave walls.|Ancestor, Forefather",
+  "8|Forlorn|Pitifully sad and abandoned or lonely.|The forlorn puppy waited in the rain for its owner to return.|Sad, Miserable",
+  "8|Foundation|The lowest load-bearing part of a building, typically below ground level.|The builders poured concrete to create a strong foundation for the house.|Base, Bottom",
+  "8|Fragment|A small part broken or separated off something.|She swept up every sharp fragment of the broken glass.|Piece, Bit",
+  "8|Frail|Weak and delicate.|The frail old bird struggled to fly in the strong wind.|Weak, Delicate",
+  "8|Frantic|Wild or distraught with fear, anxiety, or other emotion.|The frantic mother searched everywhere for her lost keys.|Panicked, Anxious",
+  "8|Fraud|Wrongful or criminal deception intended to result in financial or personal gain.|The criminal was arrested for committing bank fraud.|Deception, Cheating",
+  "8|Fraudulent|Obtained, done by, or involving deception, especially criminal deception.|He used fraudulent methods to trick people out of their money.|Dishonest, Corrupt",
+  "8|Frequent|Occurring or done on many occasions, in many cases, or in quick succession.|She is a frequent visitor to the local library.|Regular, Repeated",
+  "8|Frightful|Very unpleasant, serious, or shocking.|A frightful storm damaged the roofs of several houses.|Terrible, Awful",
+  "8|Front|The side or part of an object that presents itself to view or that is normally seen or used first.|The teacher stood at the front of the classroom.|Fore, Face",
+  "8|Fund|A sum of money saved or made available for a particular purpose.|The school started a fund to buy new sports equipment.|Reserve, Pool",
+  "8|Fundamental|Forming a necessary base or core; of central importance.|Learning the alphabet is a fundamental part of reading.|Basic, Core",
+  "8|Galvanise|To shock or excite someone into taking action.|The inspiring speech will galvanise the team to play harder.|Spur, Stimulate",
+  "8|Garment|An item of clothing.|The king wore a luxurious velvet garment to the banquet.|Clothing, Apparel",
+  "8|Gauge|To estimate or determine the magnitude, amount, or volume of.|It is difficult to gauge exactly how deep the murky water is.|Measure, Estimate",
+  "8|Gilt|Covered thinly with gold leaf or gold paint.|The antique mirror was held in a beautiful gilt frame.|Gold-plated, Golden",
+  "8|Glib|Fluent and voluble but insincere and shallow.|No one trusted the salesman because of his glib and smooth talking.|Slick, Smooth",
+  "8|Gloomy|Dark or poorly lit, especially so as to appear depressing or frightening.|The haunted castle was damp, dark, and gloomy.|Dark, Dreary",
+
+  // LEVEL 9 (50 Words)
+  "9|Acumen|The ability to make good judgments and quick decisions.|Her brilliant business acumen helped her turn a tiny shop into a global empire.|Astuteness, Shrewdness, Sharpness",
+  "9|Bellicose|Demonstrating aggression and willingness to fight.|The bellicose general was always eager to start a new war.|Aggressive, Hostile, Warlike",
+  "9|Churlish|Rude in a mean-spirited and surly way.|It would be extremely churlish to complain about a gift that was given with love.|Rude, Ill-mannered, Surly",
+  "9|Didactic|Intended to teach, particularly in having moral instruction as an ulterior motive.|Aesop's fables are highly didactic stories meant to teach children right from wrong.|Educational, Instructive, Pedagogic",
+  "9|Enervate|To cause someone to feel drained of energy or vitality.|The blistering heat of the desert sun will rapidly enervate even the strongest explorer.|Exhaust, Tire, Drain",
+  "9|Fatuous|Silly and pointless.|He interrupted the serious meeting with a fatuous comment about his socks.|Silly, Foolish, Stupid",
+  "9|Gauche|Lacking ease or grace; unsophisticated and socially awkward.|It is considered gauche to chew with your mouth open at a formal dinner.|Awkward, Clumsy, Inelegant",
+  "9|Hegemony|Leadership or dominance, especially by one country or social group.|The Roman Empire maintained its military hegemony over Europe for centuries.|Dominance, Leadership, Supremacy",
+  "9|Incontrovertible|Not able to be denied or disputed.|The video footage provided incontrovertible proof that he stole the car.|Indisputable, Undeniable, Unquestionable",
+  "9|Lugubrious|Looking or sounding sad and dismal.|The bloodhound's drooping eyes gave it a permanently lugubrious expression.|Mournful, Gloomy, Sad",
+  "9|Misanthrope|A person who dislikes humankind and avoids human society.|The grumpy old misanthrope lived entirely alone and shouted at anyone who came near.|Cynic, Recluse, Hater",
+  "9|Nihilism|The rejection of all religious and moral principles.|His deep nihilism made him believe that nothing in life truly mattered.|Cynicism, Skepticism, Negativity",
+  "9|Obsequious|Obedient or attentive to an excessive or servile degree.|The obsequious waiter kept bowing and flattering the wealthy guests.|Servile, Fawning, Ingratiating",
+  "9|Pernicious|Having a harmful effect, especially in a gradual or subtle way.|The pernicious gossip slowly destroyed the politician's spotless reputation.|Harmful, Damaging, Destructive",
+  "9|Rambunctious|Uncontrollably exuberant; boisterous.|The rambunctious puppies knocked over the table and tore up the cushions.|Boisterous, Exuberant, Wild",
+  "9|Sanguine|Optimistic or positive, especially in an apparently bad or difficult situation.|Despite the terrible weather forecast, he remained sanguine about the picnic.|Optimistic, Hopeful, Positive",
+  "9|Trepidation|A feeling of fear or agitation about something that may happen.|She opened the letter containing her exam results with deep trepidation.|Fear, Apprehension, Dread",
+  "9|Unctuous|Excessively or ingratiatingly flattering; oily.|The salesman's unctuous manner made the customers feel quite uncomfortable.|Sycophantic, Fawning, Smarmy",
+  "9|Vacuous|Having or showing a lack of thought or intelligence; mindless.|He stared at the confusing puzzle with a totally vacuous expression.|Blank, Vacant, Empty",
+  "9|Winnow|To blow a current of air through grain in order to remove the chaff; to remove.|The judges had to winnow the thousands of entries down to just five finalists.|Sift, Filter, Separate",
+  "9|Xenophobe|A person having a dislike of or prejudice against people from other countries.|A true xenophobe fears foreign cultures and refuses to try new things.|Racist, Bigot, Chauvinist",
+  "9|Zealot|A person who is fanatical and uncompromising in pursuit of their ideals.|The religious zealot stood on the street corner preaching loudly to strangers.|Fanatic, Extremist, Radical",
+  "9|Abrogate|To repeal or do away with a law, right, or formal agreement.|The new president promised to abrogate the unpopular tax laws of his predecessor.|Repeal, Revoke, Overturn",
+  "9|Blandishment|A flattering or pleasing statement or action used to persuade someone.|She resisted all his blandishments and firmly refused to sell the house.|Flattery, Cajolery, Coaxing",
+  "9|Convivial|Friendly, lively, and enjoyable.|The pub had a wonderfully convivial atmosphere filled with laughter and music.|Friendly, Genial, Sociable",
+  "9|Glutton|An excessively greedy eater.|The glutton ate four huge slices of chocolate cake.|Gorger, Overeater",
+  "9|Grandeur|Splendor and impressiveness, especially of appearance or style.|The sheer grandeur of the royal palace amazed the visitors.|Splendor, Magnificence",
+  "9|Grate|To reduce something, especially food, to small shreds by rubbing it on a grater.|Please grate some cheese to sprinkle over the pasta.|Shred, Rub",
+  "9|Grotesque|Comically or repulsively ugly or distorted.|The gargoyle on the roof had a grotesque and frightening face.|Ugly, Deformed",
+  "9|Gung-ho|Unthinkingly enthusiastic and eager, especially about taking part in fighting or warfare.|The gung-ho soldiers cheered as they marched into battle.|Enthusiastic, Eager",
+  "9|Habitat|The natural home or environment of an animal, plant, or other organism.|The jungle is the natural habitat of the brightly colored parrot.|Home, Environment",
+  "9|Halt|To bring or come to an abrupt stop.|The train came to a sudden halt at the broken bridge.|Stop, Pause",
+  "9|Hamper|To hinder or impede the movement or progress of.|The heavy snow will hamper our efforts to drive to the city.|Hinder, Obstruct",
+  "9|Handsome|Good-looking.|The handsome prince rode his white horse through the town.|Attractive, Good-looking",
+  "9|Harass|To subject to aggressive pressure or intimidation.|The angry geese began to harass the people walking by the lake.|Pester, Bother",
+  "9|Heed|To pay attention to; take notice of.|You must heed the warning signs when swimming in the sea.|Notice, Listen",
+  "9|Helter-Skelter|In disorderly haste or confusion.|The children ran helter-skelter when the bell rang for break time.|Chaotic, Disorderly",
+  "9|Heroic|Having the characteristics of a hero or heroine; very brave.|The firefighter made a heroic dive to rescue the trapped cat.|Brave, Courageous",
+  "9|Hierarchical|Of the nature of a hierarchy; arranged in order of rank.|The army has a strict hierarchical structure from general to private.|Ranked, Ordered",
+  "9|Hierarchy|A system or organization in which people or groups are ranked one above the other according to status or authority.|The wolf pack has a clear hierarchy with an alpha male at the top.|Ranking, Order",
+  "9|Hindsight|Understanding of a situation or event only after it has happened or developed.|With hindsight, he realized he should have brought an umbrella.|Retrospect, Looking back",
+  "9|Hoax|A humorous or malicious deception.|The report of an alien spaceship landing turned out to be a massive hoax.|Trick, Prank",
+  "9|Holiday|An extended period of leisure and recreation, especially one spent away from home or in traveling.|We are going on holiday to the beach next week.|Vacation, Break",
+  "9|Holler|To give a loud shout or cry.|I heard him holler from the other side of the playground.|Shout, Yell",
+  "9|Humane|Having or showing compassion or benevolence.|The animal shelter treats all stray dogs in a kind and humane way.|Compassionate, Kind",
+  "9|Hypothetical|Based on or serving as a hypothesis.|Let's discuss a hypothetical situation where we could travel through time.|Theoretical, Imaginary",
+  "9|Identity|The fact of being who or what a person or thing is.|The superhero always keeps his true identity a secret.|Character, Name",
+  "9|Idle|Avoiding work; lazy.|The idle student refused to do any homework.|Lazy, Inactive",
+  "9|Idol|A person or thing that is greatly admired, loved, or revered.|The famous pop star is a major idol to millions of fans.|Hero, Icon",
+  "9|Idyllic|Extremely happy, peaceful, or picturesque.|The quiet countryside cottage was the perfect idyllic retreat.|Perfect, Peaceful",
+
+  // LEVEL 10 (50 Words)
+  "10|Adumbrate|To report or represent in outline; indicate faintly.|The architect used a quick sketch to adumbrate his grand vision for the new cathedral.|Outline, Sketch, Foreshadow",
+  "10|Bifurcate|To divide into two branches or forks.|At the ancient oak tree, the muddy trail will bifurcate into two separate paths.|Divide, Fork, Split",
+  "10|Cogent|Clear, logical, and convincing.|The lawyer presented a highly cogent argument that easily won over the jury.|Convincing, Compelling, Persuasive",
+  "10|Desiccate|To remove the moisture from something; cause to become completely dry.|The intense desert heat will quickly desiccate any plants left without water.|Dry, Dehydrate, Parch",
+  "10|Evanescent|Soon passing out of sight, memory, or existence; quickly fading.|The beautiful rainbow was evanescent, disappearing entirely after just a few minutes.|Vanishing, Fading, Fleeting",
+  "10|Fulsome|Complimentary or flattering to an excessive degree.|The mayor gave a fulsome speech praising the hero, bordering on being insincere.|Excessive, Extravagant, Overdone",
+  "10|Garrulity|Excessive talkativeness, especially on trivial matters.|Her annoying garrulity meant that no one else could get a word in during the meeting.|Loquacity, Verbosity, Talkativeness",
+  "10|Heterogeneous|Diverse in character or content.|London's population is highly heterogeneous, with people from all over the world.|Diverse, Varied, Mixed",
+  "10|Intransigent|Unwilling or refusing to change one's views or to agree about something.|The intransigent union leaders completely refused to negotiate a compromise.|Uncompromising, Stubborn, Inflexible",
+  "10|Juxtaposition|The fact of two things being seen or placed close together with contrasting effect.|The juxtaposition of the shiny glass skyscraper next to the medieval castle was striking.|Comparison, Contrast, Proximity",
+  "10|Laconic|Using very few words.|The tough detective gave a laconic reply of simply 'No'.|Brief, Concise, Terse",
+  "10|Mellifluous|Sweet or musical; pleasant to hear.|The opera singer had a rich, mellifluous voice that enchanted the whole audience.|Sweet-sounding, Musical, Harmonious",
+  "10|Neophyte|A person who is new to a subject, skill, or belief.|Because he was a neophyte at coding, he asked a lot of basic questions.|Beginner, Novice, Rookie",
+  "10|Obdurate|Stubbornly refusing to change one's opinion or course of action.|Despite her friends begging her, the obdurate girl refused to apologize.|Stubborn, Inflexible, Unyielding",
+  "10|Perspicacious|Having a ready insight into and understanding of things.|The perspicacious detective quickly realized that the 'victim' was actually the criminal.|Astute, Shrewd, Perceptive",
+  "10|Quixotic|Exceedingly idealistic; unrealistic and impractical.|His quixotic plan to end world hunger by handing out free cakes was never going to work.|Idealistic, Unrealistic, Utopian",
+  "10|Recondite|Little known; abstruse.|The professor loved to lecture on recondite topics that confused his students.|Obscure, Abstruse, Arcane",
+  "10|Sagacious|Having or showing keen mental discernment and good judgment.|The sagacious old owl gave excellent advice to the animals of the forest.|Wise, Clever, Intelligent",
+  "10|Trenchant|Vigorous or incisive in expression or style.|The critic wrote a trenchant review that harshly exposed the flaws in the movie.|Incisive, Cutting, Pointed",
+  "10|Umbrage|Offense or annoyance.|He took extreme umbrage at her suggestion that his work was messy.|Offense, Resentment, Indignation",
+  "10|Vicissitude|A change of circumstances or fortune, typically one that is unwelcome.|The ancient castle survived wars and storms, enduring every vicissitude of time.|Change, Alteration, Fluctuation",
+  "10|Welter|A large number of items in no order; a confused mass.|His messy desk was a welter of paperwork, coffee cups, and broken pens.|Jumble, Tangle, Clutter",
+  "10|Xenophobia|Intense or irrational dislike or fear of people from other countries.|The politician's speech was dangerous because it encouraged xenophobia among the crowd.|Prejudice, Bigotry, Nationalism",
+  "10|Yoke|To attach two things together; or a burden of oppression.|The cruel dictator forced his people to bear the heavy yoke of taxation.|Burden, Oppression, Bondage",
+  "10|Zeugma|A figure of speech in which a word applies to two others in different senses.|'He caught a cold and the last train' is a perfect example of a zeugma.|Pun, Wordplay, Figure of speech",
+  "10|Immaculate|Perfectly clean, neat, or tidy.|She kept her bedroom immaculate, without a speck of dust anywhere.|Spotless, Perfect",
+  "10|Immerse|To dip or submerge in a liquid.|You need to immerse the tea bag in boiling water.|Submerge, Dip",
+  "10|Impassive|Not feeling or showing emotion.|The royal guard maintained a completely impassive expression.|Expressionless, Blank",
+  "10|Impede|To delay or prevent someone or something by obstructing them; hinder.|The fallen tree will impede our journey through the forest.|Hinder, Obstruct",
+  "10|Imperative|Of vital importance; crucial.|It is imperative that you wear a helmet while riding your bike.|Crucial, Vital",
+  "10|Inadequate|Lacking the quality or quantity required; insufficient.|The meager rations were inadequate for the hungry soldiers.|Insufficient, Poor",
+  "10|Incision|A surgical cut made in skin or flesh.|The surgeon made a small, precise incision during the operation.|Cut, Slice",
+  "10|Incline|To feel willing or favorably disposed toward an action, belief, or attitude.|I incline to believe her story because she is very honest.|Tend, Lean",
+  "10|Inconsequential|Not important or significant.|The minor scratch on the car's bumper was completely inconsequential.|Insignificant, Unimportant",
+  "10|Incumbent|Necessary for someone as a duty or responsibility.|It is incumbent on all of us to protect the environment.|Binding, Obligatory",
+  "10|Inequity|Lack of fairness or justice.|The protest was against the profound inequity in the new laws.|Unfairness, Injustice",
+  "10|Inert|Lacking the ability or strength to move.|The injured animal lay inert on the side of the road.|Motionless, Still",
+  "10|Infantile|Of or occurring among babies or very young children.|His infantile behavior and tantrums annoyed his older sister.|Childish, Immature",
+  "10|Inferior|Lower in rank, status, or quality.|The cheap plastic toy was of vastly inferior quality to the wooden one.|Lesser, Substandard",
+  "10|Inhale|To breathe in air, smoke, or gas.|Take a deep breath and inhale the fresh mountain air.|Breathe in, Gasp",
+  "10|Innocuous|Not harmful or offensive.|Despite its scary appearance, the spider is completely innocuous.|Harmless, Safe",
+  "10|Insane|In a state of mind which prevents normal perception, behavior, or social interaction; seriously mentally ill.|Driving a car at 150 mph on a rainy night is an insane idea.|Crazy, Mad",
+  "10|Insinuate|To suggest or hint something bad or reprehensible in an indirect and unpleasant way.|Are you trying to insinuate that I stole the missing money?|Hint, Suggest",
+  "10|Intangible|Unable to be touched or grasped; not having physical presence.|The wind is an intangible force that you can feel but not hold.|Invisible, Impalpable",
+  "10|Interfere|To take part or intervene in an activity without invitation or necessity.|Please do not interfere while I am trying to fix the computer.|Meddle, Intrude",
+  "10|Interrupt|To stop the continuous progress of an activity or process.|Please do not interrupt the teacher while she is speaking.|Stop, Break",
+  "10|Inundate|To overwhelm someone with things or people to be dealt with.|The angry customers will inundate the shop with complaints.|Overwhelm, Flood",
+  "10|Ironic|Using or characterized by irony.|It is highly ironic that the fire station burned to the ground.|Sarcastic, Paradoxical",
+  "10|Isolation|The process or fact of isolating or being isolated.|The hermit lived in total isolation in his cabin in the woods.|Separation, Solitude",
+  "10|Jargon|Special words or expressions that are used by a particular profession or group.|The contract was full of confusing legal jargon that no one understood.|Slang, Terminology"
+];
+
+    const parseVocab = () => {
+      const dictionary = {};
+      for (let i = 1; i <= 10; i++) dictionary[i] = [];
+      rawVocabData.forEach(entry => {
+        const [lvl, w, d, s, syn] = entry.split('|');
+        if (dictionary[lvl]) {
+          dictionary[lvl].push({ word: w, def: d, sentence: s, synonyms: syn });
+        }
+      });
+      return dictionary;
+    };
+    const VOCAB_DICTIONARY = parseVocab();
+
+    const PLAYER_AVATAR = "https://static.wikia.nocookie.net/deathbattle/images/1/1c/Portrait.ashketchum.png/revision/latest?cb=20240426202222";
+
+    // --- COMPONENTS ---
+
+    const Confetti = () => {
+      return (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+          {[...Array(60)].map((_, i) => {
+            const colors = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#ec4899'];
+            const left = Math.random() * 100;
+            const animDuration = Math.random() * 2 + 2;
+            const delay = Math.random() * 1.5;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            return (
+              <div
+                key={i}
+                className="absolute w-4 h-4 rounded-sm"
+                style={{
+                  left: `${left}%`,
+                  top: `-5%`,
+                  backgroundColor: color,
+                  animation: `fall ${animDuration}s linear ${delay}s forwards`,
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                }}
+              />
+            );
+          })}
+        </div>
+      );
+    };
+
+    const Toast = ({ message, type }) => (
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-pop pointer-events-none">
+        <div className={`px-6 py-3 rounded-full shadow-2xl flex items-center justify-center gap-3 text-white font-bold text-lg border-2 border-black manga-border-sm whitespace-nowrap
+          ${type === 'powerup' ? 'bg-[#ec5b13]' : 'bg-[#fde047] text-black'}
+        `}>
+          {type === 'powerup' ? <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1", fontSize: "24px"}}>bolt</span> : <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1", fontSize: "24px"}}>favorite</span>}
+          {message}
+        </div>
+      </div>
+    );
+
+    // --- MAIN APP ---
+
+    function App() {
+      const [gameState, setGameState] = useState('menu'); 
+      const [level, setLevel] = useState(1);
+      const [lives, setLives] = useState(5);
+      const [score, setScore] = useState(0);
+      
+      const [streak, setStreak] = useState(0);
+      const [maxStreak, setMaxStreak] = useState(0); 
+      
+      const [powerups, setPowerups] = useState({ skip: 1, fiftyFifty: 1, sentence: 1, synonym: 1 });
+      
+      const [questionsAnswered, setQuestionsAnswered] = useState(0);
+      const [usedWords, setUsedWords] = useState(new Set());
+      
+      const [currentQuestion, setCurrentQuestion] = useState(null);
+      const [removedOptions, setRemovedOptions] = useState(new Set());
+      const [isProcessing, setIsProcessing] = useState(false);
+      const [selectedOption, setSelectedOption] = useState(null);
+      
+      const [feedback, setFeedback] = useState(null);
+      const [showSentenceModal, setShowSentenceModal] = useState(false);
+      const [showSynonymModal, setShowSynonymModal] = useState(false);
+      
+      const [toast, setToast] = useState(null);
+      const [highScores, setHighScores] = useState([]);
+      const [isLoadingScores, setIsLoadingScores] = useState(false);
+      
+      const [currentMonster, setCurrentMonster] = useState({ name: '???', image: '' });
+      const [isLoadingMonster, setIsLoadingMonster] = useState(false);
+      
+      const [playerName, setPlayerName] = useState('');
+      const [isScoreSaved, setIsScoreSaved] = useState(false);
+
+      const [isMuted, setIsMuted] = useState(false);
+
+      const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzMp36xAotY0aPKfzGzooyFnGgNiHOjQ5ivojEfaJH4VU3FQh3zX93iH78_JH2dlutu/exec';
+
+      const fetchRandomMonster = async () => {
+        setIsLoadingMonster(true);
+        try {
+          const randomId = Math.floor(Math.random() * 898) + 1;
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+          const data = await res.json();
+          setCurrentMonster({
+            name: data.name.toUpperCase(),
+            image: data.sprites.other['official-artwork'].front_default || data.sprites.front_default
+          });
+        } catch (error) {
+          console.error("Failed to fetch pokemon", error);
+          setCurrentMonster({ name: "WILD POKEMON", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" });
+        } finally {
+          setIsLoadingMonster(false);
+        }
+      };
+
+      useEffect(() => {
+        const saved = localStorage.getItem('11plus_vocab_scores');
+        if (saved) setHighScores(JSON.parse(saved));
+
+        const fetchGlobalScores = async () => {
+          setIsLoadingScores(true);
+          try {
+            const response = await fetch(GOOGLE_SHEETS_URL);
+            const data = await response.json();
+            
+            if (data && Array.isArray(data)) {
+              const sortedScores = data.sort((a, b) => b.score - a.score).slice(0, 10);
+              setHighScores(sortedScores);
+              localStorage.setItem('11plus_vocab_scores', JSON.stringify(sortedScores));
+            }
+          } catch (error) {
+            console.error("Could not fetch global scores from Google Sheets:", error);
+          } finally {
+            setIsLoadingScores(false);
+          }
+        };
+
+        fetchGlobalScores();
+      }, []);
+
+      const saveScore = async (name) => {
+        const finalName = name || 'Anonymous Trainer';
+        const newScore = { name: finalName, score, level };
+        const newScores = [...highScores, newScore]
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10);
+          
+        setHighScores(newScores);
+        localStorage.setItem('11plus_vocab_scores', JSON.stringify(newScores));
+        setIsScoreSaved(true);
+
+        try {
+          await fetch(GOOGLE_SHEETS_URL, {
+            method: 'POST',
+            mode: 'no-cors', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: finalName, score: score, level: level }),
+          });
+        } catch (error) {
+          console.error("Could not save to Google Sheets:", error);
+        }
+      };
+
+      const showToastMsg = (msg, type) => {
+        setToast({ message: msg, type });
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      let audioCtx = null;
+      const playSoundEffect = (type) => {
+        if (isMuted) return;
+        
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'incorrect') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'powerup') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(1108.73, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }
+      };
+
+      const beginQuest = () => {
+        setLevel(1);
+        setLives(5);
+        setScore(0);
+        setStreak(0);
+        setMaxStreak(0);
+        setIsScoreSaved(false);
+        setPowerups({ skip: 1, fiftyFifty: 1, sentence: 1, synonym: 1 });
+        setQuestionsAnswered(0);
+        setUsedWords(new Set());
+        setIsProcessing(false);
+        setSelectedOption(null);
+        setGameState('vs_screen');
+        fetchRandomMonster();
+      };
+
+      const startBattle = () => {
+        setGameState('playing');
+        generateQuestion(level, usedWords);
+      };
+
+      const generateQuestion = (currentLvl, currentUsedWords) => {
+        const levelWords = VOCAB_DICTIONARY[currentLvl];
+        const availableWords = levelWords.filter(w => !currentUsedWords.has(w.word));
+        
+        const targetWord = availableWords.length > 0 
+          ? availableWords[Math.floor(Math.random() * availableWords.length)]
+          : levelWords[Math.floor(Math.random() * levelWords.length)];
+
+        const wrongOptions = [];
+        while (wrongOptions.length < 3) {
+          const randomWord = levelWords[Math.floor(Math.random() * levelWords.length)];
+          if (randomWord.word !== targetWord.word && !wrongOptions.includes(randomWord.def)) {
+            wrongOptions.push(randomWord.def);
+          }
+        }
+
+        const options = [...wrongOptions, targetWord.def];
+        
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+        
+        const correctIndex = options.indexOf(targetWord.def);
+
+        setCurrentQuestion({ 
+          word: targetWord.word, 
+          def: targetWord.def, 
+          sentence: targetWord.sentence,
+          synonyms: targetWord.synonyms,
+          options, 
+          correctIndex 
+        });
+        setRemovedOptions(new Set());
+        setShowSentenceModal(false);
+        setShowSynonymModal(false);
+        setIsProcessing(false);
+        setSelectedOption(null);
+      };
+
+      const handleAnswer = (opt, index) => {
+        if (isProcessing) return;
+        setIsProcessing(true);
+        setSelectedOption(index);
+
+        const newUsedWords = new Set([...usedWords, currentQuestion.word]);
+        setUsedWords(newUsedWords);
+
+        if (opt === currentQuestion.def) {
+          playSoundEffect('correct');
+          const newStreak = streak + 1;
+          setStreak(newStreak);
+          setMaxStreak(prev => Math.max(prev, newStreak)); 
+          
+          const points = (10 * level) + (newStreak * 5);
+          setScore(s => s + points);
+
+          let newPowerups = { ...powerups };
+          if (newStreak % 4 === 0 && newStreak > 0) {
+            const r = Math.random();
+            let awarded = '';
+            if (r < 0.25) { newPowerups.skip++; awarded = 'Skip'; }
+            else if (r < 0.50) { newPowerups.fiftyFifty++; awarded = '50:50'; }
+            else if (r < 0.75) { newPowerups.sentence++; awarded = 'Hint'; }
+            else { newPowerups.synonym++; awarded = 'Synonym'; }
+            
+            showToastMsg(`🔥 4 Streak! +1 ${awarded}!`, 'powerup');
+          }
+          setPowerups(newPowerups);
+
+          const newAnswered = questionsAnswered + 1;
+          setQuestionsAnswered(newAnswered);
+
+          setTimeout(() => {
+            if (newAnswered >= 10) {
+              if (lives < 5) {
+                setLives(l => l + 1);
+                showToastMsg(`🌟 Level Cleared! +1 Life!`, 'life');
+              } else {
+                setPowerups(prev => ({
+                  skip: prev.skip + 1,
+                  fiftyFifty: prev.fiftyFifty + 1,
+                  sentence: prev.sentence + 1,
+                  synonym: prev.synonym + 1
+                }));
+                showToastMsg(`🔥 Max HP! +1 All Powerups!`, 'powerup');
+              }
+              setGameState('level_passed');
+            } else {
+              generateQuestion(level, newUsedWords);
+            }
+          }, 600); 
+        } else {
+          playSoundEffect('incorrect');
+          setStreak(0);
+          const newLives = lives - 1;
+          setLives(newLives);
+          setFeedback({
+            isCorrect: false,
+            word: currentQuestion.word,
+            def: currentQuestion.def
+          });
+
+          setTimeout(() => {
+            setGameState('feedback');
+          }, 1000); 
+        }
+      };
+
+      const handleFeedbackNext = () => {
+        if (lives <= 0) {
+          setGameState('game_over');
+        } else {
+          setGameState('playing');
+          generateQuestion(level, usedWords);
+        }
+      };
+
+      const handleNextLevel = () => {
+        if (level >= 10) {
+          setGameState('game_over'); 
+        } else {
+          const nextLevel = level + 1;
+          setLevel(nextLevel);
+          setQuestionsAnswered(0);
+          setGameState('vs_screen');
+          fetchRandomMonster();
+        }
+      };
+
+      const useSkip = () => {
+        if (powerups.skip > 0 && !isProcessing) {
+          playSoundEffect('powerup');
+          setPowerups(prev => ({ ...prev, skip: prev.skip - 1 }));
+          const newUsedWords = new Set([...usedWords, currentQuestion.word]);
+          setUsedWords(newUsedWords);
+          generateQuestion(level, newUsedWords);
+        }
+      };
+
+      const useFiftyFifty = () => {
+        if (powerups.fiftyFifty > 0 && !isProcessing) {
+          const wrongIndices = currentQuestion.options
+            .map((opt, i) => ({ opt, i }))
+            .filter(item => item.opt !== currentQuestion.def && !removedOptions.has(item.i))
+            .map(item => item.i);
+
+          if (wrongIndices.length >= 2) {
+            playSoundEffect('powerup');
+            const shuffled = [...wrongIndices].sort(() => Math.random() - 0.5);
+            setRemovedOptions(new Set([...removedOptions, shuffled[0], shuffled[1]]));
+            setPowerups(prev => ({ ...prev, fiftyFifty: prev.fiftyFifty - 1 }));
+          } else if (wrongIndices.length === 1) {
+            playSoundEffect('powerup');
+            setRemovedOptions(new Set([...removedOptions, wrongIndices[0]]));
+            setPowerups(prev => ({ ...prev, fiftyFifty: prev.fiftyFifty - 1 }));
+          }
+        }
+      };
+
+      const useSentence = () => {
+        if (powerups.sentence > 0 && !showSentenceModal && !showSynonymModal && !isProcessing) {
+          playSoundEffect('powerup');
+          setPowerups(prev => ({ ...prev, sentence: prev.sentence - 1 }));
+          setShowSentenceModal(true);
+        }
+      };
+
+      const useSynonym = () => {
+        if (powerups.synonym > 0 && !showSynonymModal && !showSentenceModal && !isProcessing) {
+          playSoundEffect('powerup');
+          setPowerups(prev => ({ ...prev, synonym: prev.synonym - 1 }));
+          setShowSynonymModal(true);
+        }
+      };
+
+      const playPronunciation = (wordToSay) => {
+        if (isMuted) return;
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=${encodeURIComponent(wordToSay)}`;
+        const audio = new Audio(url);
+        
+        audio.play().catch(error => {
+          console.log("Google Audio blocked by browser policy, falling back to local TTS engine.");
+          if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(wordToSay);
+            utterance.lang = 'en-GB';
+            window.speechSynthesis.speak(utterance);
+          }
+        });
+      };
+
+      const GlobalStyles = () => (
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@700&display=swap');
+
+          .font-public-sans { font-family: 'Public Sans', sans-serif; }
+          .font-action { font-family: 'Bangers', cursive; letter-spacing: 0.05em; }
+          .font-ui { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+
+          .manga-border { border: 3px solid #000; box-shadow: 4px 4px 0px #000; }
+          .manga-border-thick { border: 4px solid #000; box-shadow: 6px 6px 0px #000; }
+          .manga-border-sm { border: 2px solid #000; box-shadow: 3px 3px 0px #000; }
+          .manga-outline { box-shadow: 4px 4px 0px 0px #000; }
+          .manga-outline-sm { box-shadow: 2px 2px 0px 0px #000; }
+          .manga-skew { transform: skew(-2deg); }
+          .manga-text-stroke { -webkit-text-stroke: 1px black; }
+          .manga-text-stroke-thick { -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0px #000; }
+          
+          .battle-button:active { box-shadow: 0px 0px 0px 0px #000; transform: translate(4px, 4px); }
+          
+          .h-screen-safe { height: 100vh; height: 100dvh; }
+          .burst-bg { background: repeating-conic-gradient(from 0deg, rgba(253, 224, 71, 0.1) 0deg 15deg, transparent 15deg 30deg); }
+          .radial-burst-bg { background: radial-gradient(circle, #fde047 0%, #ec5b13 70%, #221610 100%); }
+          
+          .action-lines {
+            background: radial-gradient(circle, transparent 20%, white 100%),
+                        repeating-conic-gradient(from 0deg, #f3f4f6 0deg 10deg, #ffffff 10deg 20deg);
+            background-blend-mode: multiply;
+          }
+          .vs-text {
+            text-shadow: 4px 4px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+            font-size: 8rem;
+          }
+          .halftone {
+            background-image: radial-gradient(#000 10%, transparent 10%);
+            background-size: 4px 4px;
+            opacity: 0.05;
+            pointer-events: none;
+          }
+
+          @keyframes bounce-slow {
+            0%, 100% { transform: translateY(-3%) rotate(-1deg); }
+            50% { transform: translateY(0) rotate(1deg); }
+          }
+          .animate-mascot { animation: bounce-slow 2.5s ease-in-out infinite; }
+          
+          @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+          }
+          @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          .animate-pop { animation: pop 0.5s ease-out forwards; }
+        `}</style>
+      );
+
+      if (gameState === 'menu') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f6f6] font-public-sans pb-24 relative overflow-hidden">
+            <GlobalStyles />
+            <button onClick={() => setIsMuted(!isMuted)} className="absolute top-6 right-6 bg-white border-2 border-black p-2 rounded-full manga-border-sm hover:bg-slate-50 transition z-50">
+              <span className="material-symbols-outlined text-black">{isMuted ? 'volume_off' : 'volume_up'}</span>
+            </button>
+            <header className="w-full max-w-md text-center py-6 mt-4">
+              <h1 className="text-5xl font-black italic text-[#ec5b13] manga-text-stroke tracking-tighter -rotate-2 uppercase">
+                VOCAB QUEST
+                <span className="block text-2xl text-[#221610] mt-1 uppercase tracking-tighter not-italic font-black">11+ PREP BATTLE</span>
+              </h1>
+            </header>
+            <main className="w-full max-w-md flex flex-col items-center gap-6 z-10">
+              <div className="relative w-56 h-56 flex items-center justify-center animate-mascot">
+                <div className="relative p-2 bg-white border-4 border-black manga-outline rounded-xl overflow-hidden">
+                  <img alt="Manga monster mascot" className="w-44 h-44 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXOKMhYMiBqQfzuOfh2lkDKLTIzyO2F73YJBflLEMMdubwjYUx_k02xbI-NSn5ymAynR_Z3p2t4XxDPkkOq-aRji7sNBbi4IkAimfKRdYE6QE1E-o1XzxEW-S-mWpZOM8TZQyCcw53sbe95N9gbZYlmFPvl5MXwMMkQxw9Zl4p_HyGZUAdmtF4bByTOxhPsYcWDKB8hU1denUsI-kWSAWqsvSG5KkkWyJnx0io2gvmMOXjZRAfNS2QTEWrUnJlTKIWdOw5EkKIBdzh"/>
+                  <div className="absolute -top-1 -right-1 bg-[#fde047] border-2 border-black p-1 px-3 rounded-lg manga-outline-sm text-[10px] font-black text-black rotate-12 italic uppercase">
+                    "I CHOOSE YOU!"
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setGameState('name_entry')} className="w-full max-w-xs battle-button bg-[#ec5b13] hover:bg-orange-600 text-white text-4xl font-black italic py-4 px-8 rounded-xl border-4 border-black manga-outline transition-all flex items-center justify-between gap-3 group uppercase tracking-tighter">
+                <span className="group-hover:translate-x-1 transition-transform">FIGHT!</span>
+                <div className="bg-white p-1 border-2 border-black rounded-lg">
+                  <span className="material-symbols-outlined text-black font-black text-3xl">play_arrow</span>
+                </div>
+              </button>
+            </main>
+            <nav className="fixed bottom-6 left-4 right-4 max-w-md mx-auto bg-white border-4 border-black manga-outline p-2 flex justify-around items-center rounded-2xl z-50">
+              <button className="flex flex-col items-center p-2 text-[#ec5b13]">
+                <span className="material-symbols-outlined font-black" style={{ fontVariationSettings: "'FILL' 1" }}>swords</span>
+                <span className="text-[10px] font-black italic uppercase tracking-tighter">Quest</span>
+              </button>
+              <button onClick={() => setGameState('leaderboard')} className="flex flex-col items-center p-2 text-slate-400 hover:text-[#ec5b13] transition-colors">
+                <span className="material-symbols-outlined font-black">emoji_events</span>
+                <span className="text-[10px] font-black italic uppercase tracking-tighter">Scores</span>
+              </button>
+            </nav>
+          </div>
+        );
+      }
+
+      if (gameState === 'name_entry') {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-[#f8f6f6] font-public-sans overflow-hidden relative">
+            <GlobalStyles />
+            <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
+              <div className="absolute bg-black h-1 w-24 top-10 left-[-10px] rotate-45"></div>
+              <div className="absolute bg-black h-1 w-32 bottom-20 right-[-20px] -rotate-12"></div>
+              <div className="absolute bg-black h-1 w-40 top-1/4 right-10 rotate-[160deg]"></div>
+            </div>
+            <main className="relative z-10 w-full max-w-md px-6 py-8 flex flex-col items-center gap-8 animate-pop">
+              <section className="text-center">
+                <div className="mb-2">
+                  <span className="inline-block bg-black text-white px-3 py-1 text-xs font-black uppercase tracking-widest transform -rotate-2 border-2 border-white manga-outline-sm">
+                    New Journey Awaits
+                  </span>
+                </div>
+                <img src={PLAYER_AVATAR} alt="Trainer Avatar" className="w-32 h-32 mx-auto object-contain drop-shadow-md mt-4 border-4 border-black bg-white rounded-full manga-border" />
+                <h1 className="text-4xl md:text-5xl text-[#ec5b13] font-black leading-tight uppercase italic manga-text-stroke tracking-tighter mt-4">
+                  Enter Your<br/>Trainer Name
+                </h1>
+              </section>
+              <section className="w-full space-y-6">
+                <div className="relative group">
+                  <input id="trainer-name" type="text" maxLength={12} placeholder="CHAMPION..." value={playerName} onChange={(e) => setPlayerName(e.target.value)} className="w-full bg-white p-5 text-2xl font-black uppercase placeholder-slate-300 focus:ring-0 focus:outline-none text-center manga-border-thick transition-all focus:border-[#ec5b13]" autoFocus />
+                  <div className="absolute -top-3 -right-2 bg-[#fde047] border-2 border-black px-2 py-0.5 text-[10px] font-bold uppercase manga-outline-sm">
+                    Max 12 Chars
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <button onClick={beginQuest} disabled={!playerName.trim()} className={`w-full text-white py-5 rounded-xl text-2xl font-black uppercase italic tracking-tighter manga-border-thick transition-all flex items-center justify-center gap-2
+                      ${!playerName.trim() ? 'bg-slate-400 opacity-50 cursor-not-allowed' : 'bg-[#ec5b13] hover:bg-orange-600 active:translate-y-1 active:translate-x-1 active:shadow-none'}
+                    `}>
+                    Start Quest!
+                    <span className="material-symbols-outlined font-black">arrow_forward_ios</span>
+                  </button>
+                </div>
+              </section>
+              <button onClick={() => setGameState('menu')} className="text-slate-400 font-bold uppercase text-sm hover:text-[#ec5b13] transition mt-2 underline decoration-2 underline-offset-4">
+                 Back to Menu
+              </button>
+            </main>
+          </div>
+        );
+      }
+
+      if (gameState === 'vs_screen') {
+        return (
+          <div className="bg-white text-black overflow-hidden h-screen-safe flex flex-col font-ui max-w-md mx-auto border-x-2 border-slate-200 relative animate-pop shadow-2xl">
+            <GlobalStyles />
+            <div className="absolute inset-0 halftone z-0"></div>
+            <div className="absolute inset-0 action-lines pointer-events-none"></div>
+            <header className="relative z-20 mt-8 flex justify-center w-full">
+              <div className="bg-black text-white px-10 py-2 transform -skew-x-12 border-4 border-[#ec5b13] shadow-[8px_8px_0px_0px_#ec5b13]">
+                <h1 className="text-3xl font-action tracking-widest italic">LEVEL {level}</h1>
+              </div>
+            </header>
+            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+              <div className="transform -rotate-12 animate-bounce">
+                <span className="vs-text font-action text-[#fde047] italic">VS</span>
+              </div>
+            </div>
+            <section className="flex-grow w-full flex items-center justify-between relative z-10 overflow-hidden px-4">
+              <div className="w-1/2 h-full flex flex-col justify-center items-center">
+                <div className="relative mb-4 w-full flex justify-center">
+                  <img alt="Trainer Avatar" className="h-[25vh] min-h-[150px] w-auto object-contain drop-shadow-[10px_10px_0px_rgba(0,0,0,0.1)] opacity-100" src={PLAYER_AVATAR} />
+                </div>
+                <div className="bg-white border-4 border-black p-2 transform -skew-x-6 w-11/12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase leading-none mb-1">Trainer</p>
+                  <h2 className="text-lg font-action truncate leading-tight text-black">{playerName}</h2>
+                </div>
+              </div>
+              <div className="w-1/2 h-full flex flex-col justify-center items-center">
+                <div className="relative mb-4 w-full flex justify-center">
+                  {isLoadingMonster ? (
+                    <div className="h-[25vh] min-h-[150px] flex items-center justify-center">
+                      <div className="w-16 h-16 border-8 border-slate-200 border-t-[#ec5b13] rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <img alt="Pokemon Monster" className="h-[25vh] min-h-[150px] w-auto object-contain drop-shadow-[10px_10px_0px_rgba(0,0,0,0.15)]" src={currentMonster.image} />
+                  )}
+                </div>
+                <div className="bg-white border-4 border-black p-2 transform skew-x-6 w-11/12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase leading-none mb-1">Opponent</p>
+                  <h2 className="text-lg font-action text-[#ec5b13] truncate leading-tight">
+                    {isLoadingMonster ? "SEARCHING..." : currentMonster.name}
+                  </h2>
+                </div>
+              </div>
+            </section>
+            <footer className="relative z-40 w-full flex justify-center px-4 mb-8">
+              <button onClick={startBattle} disabled={isLoadingMonster} className={`w-full max-w-[280px] bg-black text-white font-action text-3xl py-4 transform transition-transform border-4 border-[#fde047] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] italic tracking-wider
+                  ${isLoadingMonster ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#ec5b13] hover:scale-105 active:translate-y-1 active:shadow-none'}
+                `}>
+                {isLoadingMonster ? 'LOCATING...' : 'START BATTLE!'}
+              </button>
+            </footer>
+          </div>
+        );
+      }
+
+      if (gameState === 'playing') {
+        return (
+          <div className="bg-[#f8f6f6] text-slate-900 font-public-sans selection:bg-[#ec5b13] selection:text-white overflow-hidden min-h-screen flex flex-col items-center">
+            <GlobalStyles />
+            {toast && <Toast message={toast.message} type={toast.type} />}
+            {showSentenceModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center relative manga-border-thick animate-pop">
+                  <button onClick={() => setShowSentenceModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-black transition">
+                    <span className="material-symbols-outlined text-[32px]">close</span>
+                  </button>
+                  <div className="bg-[#fde047] w-16 h-16 border-2 border-black rounded-full flex items-center justify-center mx-auto mb-4 manga-border-sm">
+                    <span className="material-symbols-outlined font-black text-3xl">lightbulb</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-black mb-4 tracking-tighter uppercase italic">Hint: Context</h3>
+                  <div className="bg-slate-50 p-6 rounded-xl border-2 border-black mb-6">
+                    <p className="text-lg text-slate-800 font-bold leading-relaxed italic uppercase">
+                      "{currentQuestion?.sentence}"
+                    </p>
+                  </div>
+                  <button onClick={() => setShowSentenceModal(false)} className="w-full bg-[#ec5b13] text-white font-black italic uppercase py-4 border-2 border-black manga-border-sm hover:bg-orange-600 transition active:translate-y-1 active:translate-x-1 active:shadow-none text-xl tracking-tighter">
+                    Got it!
+                  </button>
+                </div>
+              </div>
+            )}
+            {showSynonymModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center relative manga-border-thick animate-pop">
+                  <button onClick={() => setShowSynonymModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-black transition">
+                    <span className="material-symbols-outlined text-[32px]">close</span>
+                  </button>
+                  <div className="bg-[#fde047] w-16 h-16 border-2 border-black rounded-full flex items-center justify-center mx-auto mb-4 manga-border-sm">
+                    <span className="material-symbols-outlined font-black text-3xl">spellcheck</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-black mb-4 tracking-tighter uppercase italic">Hint: Synonyms</h3>
+                  <div className="bg-slate-50 p-6 rounded-xl border-2 border-black mb-6">
+                    <p className="text-lg text-slate-800 font-bold leading-relaxed italic uppercase">
+                      {currentQuestion?.synonyms.split(', ').map(syn => `• ${syn}`).join('\n')}
+                    </p>
+                  </div>
+                  <button onClick={() => setShowSynonymModal(false)} className="w-full bg-[#ec5b13] text-white font-black italic uppercase py-4 border-2 border-black manga-border-sm hover:bg-orange-600 transition active:translate-y-1 active:translate-x-1 active:shadow-none text-xl tracking-tighter">
+                    Got it!
+                  </button>
+                </div>
+              </div>
+            )}
+            <main className="h-screen-safe w-full flex flex-col max-w-md bg-white relative overflow-hidden shadow-2xl border-x-2 border-slate-200">
+              <div className="absolute inset-0 pointer-events-none opacity-20 burst-bg"></div>
+              <header className="p-3 flex flex-col gap-2 relative z-10 bg-white border-b-4 border-black shrink-0">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full border-2 border-black bg-slate-100 overflow-hidden shrink-0">
+                      <img src={PLAYER_AVATAR} className="w-full h-full object-cover object-top" alt="Avatar" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase text-slate-500 italic leading-none">{playerName}</span>
+                      <span className="text-lg font-black text-[#ec5b13] uppercase italic tracking-wider leading-none mt-1">
+                        LV. {String(level).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase italic mt-0.5">HP {Math.max(0, lives)}/5</span>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className={`w-4 h-3 sm:w-5 border-2 border-black ${i < lives ? 'bg-green-500' : 'bg-slate-200'}`}></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 border-2 border-black h-3 overflow-hidden rounded-full relative">
+                  <div className="bg-[#ec5b13] h-full border-r-2 border-black transition-all duration-500" style={{ width: `${(questionsAnswered / 10) * 100}%` }}></div>
+                </div>
+                <div className="flex justify-between text-[9px] font-black uppercase italic text-slate-500">
+                  <span>EXP: {score}</span>
+                  <span>NEXT: Stage {level + 1}</span>
+                </div>
+              </header>
+              <section className="flex-grow flex flex-col items-center justify-center px-4 py-2 relative z-10 overflow-y-auto">
+                {currentQuestion && (
+                  <div className="w-full animate-pop flex flex-col items-center justify-center h-full">
+                    <div className="relative mb-4 w-24 h-24 sm:w-28 sm:h-28 mx-auto shrink-0">
+                      <div className="absolute -inset-2 bg-red-500 opacity-20 blur-xl rounded-full"></div>
+                      <img alt="Enemy Monster" className="w-full h-full object-contain mix-blend-multiply relative z-10 border-4 border-black rounded-xl bg-slate-50 manga-border-sm" src={currentMonster.image}/>
+                      <div className="absolute -bottom-2 -right-3 bg-red-600 border-2 border-black text-white text-[9px] font-black px-2 py-1 transform -rotate-2 z-20 whitespace-nowrap">ENEMY: {currentMonster.name}</div>
+                    </div>
+                    <div className="text-center mb-2 relative w-full shrink-0">
+                      <div className="flex items-center justify-center gap-3">
+                        <h2 className="text-4xl sm:text-5xl font-black italic text-black uppercase tracking-tighter manga-text-stroke break-all text-center">
+                          {currentQuestion.word}
+                        </h2>
+                        <button onClick={() => playPronunciation(currentQuestion.word)} aria-label="Listen" className="bg-white border-2 shrink-0 border-black rounded-lg p-2 hover:bg-[#fde047] transition-colors manga-border-sm active:translate-y-0.5 active:translate-x-0.5 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-black font-bold text-xl">volume_up</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="min-h-[3rem] flex items-center justify-center w-full shrink-0 mx-auto">
+                      {streak > 1 && (
+                        <div className="rotate-[-2deg] px-4 py-0.5 bg-[#ec5b13] border-4 border-black transform manga-border inline-flex items-center justify-center text-center gap-2 animate-pop my-1 mx-auto">
+                          <span className="text-white font-black text-lg sm:text-xl italic tracking-tighter uppercase">CRITICAL HIT!</span>
+                          <span className="text-[#fde047] font-black text-2xl sm:text-3xl italic manga-text-stroke">x{streak}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 w-full mt-2 mb-2">
+                      {currentQuestion.options.map((opt, index) => {
+                        const isRemoved = removedOptions.has(index);
+                        const isSelected = selectedOption === index;
+                        const isCorrectAnswer = index === currentQuestion.correctIndex;
+                        let btnClass = "bg-white manga-border active:translate-y-1 active:translate-x-1 active:shadow-none hover:bg-slate-50";
+                        let letterClass = "bg-black text-white group-hover:bg-[#ec5b13]";
+                        if (isRemoved) {
+                          btnClass = "bg-slate-200 opacity-50 grayscale cursor-not-allowed border-2 border-black";
+                          letterClass = "bg-slate-400 text-slate-200";
+                        } else if (isProcessing) {
+                          if (isSelected) {
+                            btnClass = isCorrectAnswer ? "bg-green-400 border-4 border-black manga-border" : "bg-[#ff4a4a] border-4 border-black manga-border";
+                            letterClass = isCorrectAnswer ? "bg-green-700 text-white" : "bg-red-800 text-white";
+                          } else if (isCorrectAnswer) {
+                            btnClass = "bg-green-300 border-4 border-black manga-border opacity-90";
+                            letterClass = "bg-green-700 text-white";
+                          } else {
+                            btnClass = "bg-slate-100 border-4 border-black opacity-50";
+                            letterClass = "bg-slate-400 text-white";
+                          }
+                        }
+                        return (
+                          <button key={`${currentQuestion.word}-${index}`} onClick={() => !isRemoved && handleAnswer(opt, index)} disabled={isRemoved || isProcessing} className={`w-full transition-all p-3 text-left flex items-center gap-3 group ${btnClass}`}>
+                            <span className={`w-8 h-8 sm:w-10 sm:h-10 shrink-0 border-2 border-black flex items-center justify-center font-black italic text-lg sm:text-xl transition-colors ${letterClass}`}>
+                              {['A', 'B', 'C', 'D'][index]}
+                            </span>
+                            <span className="font-bold text-black text-xs sm:text-sm leading-tight uppercase">{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </section>
+              <footer className="p-3 bg-white border-t-4 border-black relative z-10 shrink-0">
+                <div className="flex justify-around items-center gap-2 sm:gap-4">
+                  <button onClick={useSkip} disabled={powerups.skip <= 0} className={`relative group ${powerups.skip <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}>
+                    <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white z-20">
+                      {powerups.skip}
+                    </div>
+                    <div className={`w-[3.5rem] sm:w-[4.2rem] h-[3.5rem] border-2 border-black manga-border-sm flex flex-col items-center justify-center group-active:translate-y-0.5 transition-transform overflow-hidden relative ${powerups.skip > 0 ? 'bg-[#fde047]' : 'bg-white'}`}>
+                      <span className="material-symbols-outlined text-black font-bold text-[20px] relative z-10">fast_forward</span>
+                      <span className="text-[8px] sm:text-[9px] font-black text-black uppercase italic mt-0.5 leading-none">Skip</span>
+                    </div>
+                  </button>
+                  <button onClick={useFiftyFifty} disabled={powerups.fiftyFifty <= 0 || removedOptions.size > 0} className={`relative group ${powerups.fiftyFifty <= 0 || removedOptions.size > 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}>
+                    <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white z-20">
+                      {powerups.fiftyFifty}
+                    </div>
+                    <div className={`w-[3.5rem] sm:w-[4.2rem] h-[3.5rem] border-2 border-black manga-border-sm flex flex-col items-center justify-center group-active:translate-y-0.5 transition-transform overflow-hidden relative ${powerups.fiftyFifty > 0 && removedOptions.size === 0 ? 'bg-[#fde047]' : 'bg-white'}`}>
+                      <span className="text-black font-black text-[16px] sm:text-lg relative z-10 italic uppercase leading-none mt-1">1/2</span>
+                      <span className="text-[8px] sm:text-[9px] font-black text-black uppercase italic mt-1 leading-none">Half</span>
+                    </div>
+                  </button>
+                  <button onClick={useSentence} disabled={powerups.sentence <= 0} className={`relative group ${powerups.sentence <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}>
+                    <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white z-20">
+                      {powerups.sentence}
+                    </div>
+                    <div className={`w-[3.5rem] sm:w-[4.2rem] h-[3.5rem] border-2 border-black manga-border-sm flex flex-col items-center justify-center group-active:translate-y-0.5 transition-transform overflow-hidden relative ${powerups.sentence > 0 ? 'bg-[#fde047]' : 'bg-white'}`}>
+                      <span className="material-symbols-outlined text-black font-bold text-[20px] relative z-10">lightbulb</span>
+                      <span className="text-[8px] sm:text-[9px] font-black text-black uppercase italic mt-0.5 leading-none">Hint</span>
+                    </div>
+                  </button>
+                  <button onClick={useSynonym} disabled={powerups.synonym <= 0} className={`relative group ${powerups.synonym <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}>
+                    <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white z-20">
+                      {powerups.synonym}
+                    </div>
+                    <div className={`w-[3.5rem] sm:w-[4.2rem] h-[3.5rem] border-2 border-black manga-border-sm flex flex-col items-center justify-center group-active:translate-y-0.5 transition-transform overflow-hidden relative ${powerups.synonym > 0 ? 'bg-[#fde047]' : 'bg-white'}`}>
+                      <span className="material-symbols-outlined text-black font-bold text-[20px] relative z-10">spellcheck</span>
+                      <span className="text-[8px] sm:text-[9px] font-black text-black uppercase italic mt-0.5 leading-none">Syns</span>
+                    </div>
+                  </button>
+                </div>
+              </footer>
+            </main>
+          </div>
+        );
+      }
+
+      if (gameState === 'feedback') {
+        return (
+          <div className="bg-[#f8f6f6] text-slate-900 font-public-sans selection:bg-[#ec5b13] selection:text-white overflow-hidden min-h-screen">
+            <GlobalStyles />
+            <main className="h-screen-safe flex flex-col max-w-md mx-auto bg-[#ff4a4a] relative overflow-hidden shadow-2xl p-6 justify-center">
+              <div className="absolute inset-0 pointer-events-none opacity-20 burst-bg"></div>
+              <div className="bg-white p-6 rounded-2xl manga-border-thick relative z-10 animate-pop text-center flex flex-col items-center">
+                <div className="absolute -top-8 bg-black border-4 border-white w-16 h-16 rounded-full flex items-center justify-center rotate-12 manga-border-sm">
+                  <span className="material-symbols-outlined text-white text-4xl font-black">close</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-black mt-8 mb-2 leading-tight">Damage Taken <br/>Life Lost!</h2>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-sm mb-6">Don't give up, {playerName}!</p>
+                <div className="w-full bg-slate-100 p-5 rounded-xl border-4 border-black mb-8 relative text-left">
+                  <button onClick={() => playPronunciation(feedback.word)} className="absolute top-3 right-3 text-slate-400 hover:text-black transition" title="Listen">
+                    <span className="material-symbols-outlined text-[24px]">volume_up</span>
+                  </button>
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">The word was</p>
+                  <h3 className="text-3xl font-black text-[#ec5b13] uppercase italic mb-4 manga-text-stroke tracking-tighter">{feedback.word}</h3>
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Correct meaning</p>
+                  <p className="text-sm text-black font-bold uppercase leading-tight">{feedback.def}</p>
+                </div>
+                <button onClick={handleFeedbackNext} className="w-full bg-[#ec5b13] text-white font-black py-4 rounded-xl manga-border-thick hover:bg-orange-600 transition active:translate-y-1 active:translate-x-1 active:shadow-none text-xl tracking-tighter uppercase italic">
+                  {lives <= 0 ? "Continue" : "Next Question"}
+                </button>
+              </div>
+            </main>
+          </div>
+        );
+      }
+
+      if (gameState === 'level_passed') {
+        const isWin = level >= 10;
+        const wordsArray = Array.from(usedWords);
+        const recentWords = wordsArray.slice(-3).join(', ');
+
+        return (
+          <div className="bg-[#f8f6f6] font-public-sans text-slate-900 min-h-screen flex flex-col">
+            <GlobalStyles />
+            <Confetti />
+            <div className="relative flex h-auto min-h-screen w-full max-w-md mx-auto flex-col bg-[#f8f6f6] overflow-x-hidden border-x border-slate-200">
+              <div className="flex items-center p-4 justify-between bg-white border-b-4 border-black z-10">
+                <button onClick={() => setGameState('menu')} className="flex w-10 h-10 shrink-0 items-center justify-center bg-[#ec5b13] rounded-lg border-2 border-black active:translate-y-1 transition-transform">
+                  <span className="material-symbols-outlined text-white">home</span>
+                </button>
+                <h2 className="text-xl font-black italic tracking-tighter uppercase text-slate-900">Vocab Quest</h2>
+                <div className="flex w-10 h-10 items-center justify-end">
+                  <button onClick={() => setGameState('leaderboard')} className="bg-slate-200 p-2 rounded-lg border-2 border-black active:translate-y-1 transition-transform">
+                    <span className="material-symbols-outlined">emoji_events</span>
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 flex flex-col items-center justify-start p-6 space-y-6 animate-pop">
+                <div className="relative w-full py-4 transform -rotate-1">
+                  <h1 className="text-[#ec5b13] text-5xl md:text-6xl font-black italic text-center manga-text-stroke-thick uppercase tracking-tighter text-white">
+                    {isWin ? "GAME\nCLEARED!" : "LEVEL\nCLEARED!"}
+                  </h1>
+                  <div className="absolute -top-2 -right-2 bg-[#fde047] text-black font-bold px-2 py-1 border-2 border-black rotate-12 text-sm">
+                    SUGOI!
+                  </div>
+                </div>
+                <div className="w-full aspect-square relative manga-border-thick rounded-xl overflow-hidden bg-[#fde047]">
+                  <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-conic-gradient(from 0deg, transparent 0deg 10deg, #fff 10deg 20deg)" }}></div>
+                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                    <img className="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] grayscale opacity-80" alt="Defeated Monster" src={currentMonster.image}/>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                    <div className="border-4 border-red-600 text-red-600 font-black text-4xl sm:text-5xl italic transform -rotate-12 px-6 py-2 manga-border-thick bg-white/95 tracking-widest">
+                      DEFEATED
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 border-2 border-black p-2 rounded-lg text-center backdrop-blur-sm">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Current Mastery</p>
+                    <p className="text-lg font-black text-[#ec5b13] italic">{isWin ? "VOCAB MASTER" : "VOCAB VANGUARD"}</p>
+                  </div>
+                </div>
+                <div className="w-full space-y-4">
+                  <div className="w-full space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="text-sm font-black uppercase italic">Rank Progress</span>
+                      <span className="text-sm font-black text-[#ec5b13] italic">
+                        {isWin ? `MAX LEVEL` : `LV. ${level} → LV. ${level + 1}`}
+                      </span>
+                    </div>
+                    <div className="h-6 w-full bg-slate-200 border-2 border-black rounded-full overflow-hidden">
+                      <div className="h-full bg-[#ec5b13] border-r-2 border-black" style={{ width: isWin ? '100%' : '85%' }}></div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white manga-border p-4 flex flex-col items-center justify-center transform rotate-1">
+                      <p className="text-[10px] font-black uppercase text-slate-500">Total Score</p>
+                      <p className="text-2xl font-black text-[#ec5b13] italic">{score} XP</p>
+                    </div>
+                    <div className="bg-[#fde047] manga-border p-4 flex flex-col items-center justify-center transform -rotate-1">
+                      <p className="text-[10px] font-black uppercase text-black/60">Lives Left</p>
+                      <div className="flex gap-1 mt-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className={`material-symbols-outlined ${i < lives ? 'text-rose-500' : 'text-black/20'}`} style={{fontVariationSettings: "'FILL' 1", fontSize: "20px"}}>favorite</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-[#ec5b13]/10 border-2 border-dashed border-[#ec5b13] p-3 rounded-xl flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[#ec5b13] font-bold">menu_book</span>
+                    <div>
+                      <p className="text-xs font-bold uppercase">New words mastered:</p>
+                      <p className="text-sm font-medium italic truncate w-[250px]">{recentWords}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 space-y-3 bg-white border-t-4 border-black mt-auto z-10">
+                <button onClick={handleNextLevel} className="w-full bg-[#ec5b13] hover:bg-orange-600 text-white font-black py-4 rounded-xl manga-border-thick text-xl italic uppercase tracking-tighter flex items-center justify-center gap-2 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
+                  {isWin ? "View Final Score" : "Next Level"}
+                  <span className="material-symbols-outlined">fast_forward</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'game_over' || gameState === 'leaderboard') {
+        const isGameOverScreen = gameState === 'game_over';
+        return (
+          <div className="min-h-screen bg-[#f8f6f6] font-public-sans text-slate-900 flex flex-col">
+            <GlobalStyles />
+            <div className="relative flex h-auto min-h-screen w-full max-w-md mx-auto flex-col bg-[#f8f6f6] overflow-x-hidden border-x border-slate-200 pb-20 animate-pop">
+              <div className="flex items-center p-4 justify-between bg-[#ec5b13]/10 border-b-4 border-black">
+                <button onClick={() => setGameState('menu')} className="text-slate-900 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-[#ec5b13]/20 cursor-pointer transition border-2 border-black bg-white">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+                <h2 className="text-[#ec5b13] text-xl font-black leading-tight tracking-tighter manga-text-stroke flex-1 text-center pr-10 uppercase italic">
+                  {isGameOverScreen ? 'Battle Ended' : 'Hall of Fame'}
+                </h2>
+              </div>
+              {isGameOverScreen && (
+                <div className="px-4 py-6 flex flex-col items-center">
+                  <div className="relative w-full aspect-square max-w-[280px] manga-border-thick bg-white overflow-hidden rounded-xl mb-6">
+                    <img className="w-full h-full object-cover" alt="Tired but determined manga monster mascot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOGhT3QgrApuRGHbpQB1ZAEs_dis9Bmyc_jq9wN8ubPUonjttvUST0uHytWbC9gGgV6Ubw0eJSnrfltTlsULDJkaNfpvwxqne-9MDZEfC6-HCbjxYUgYCwnAcPK2cAk8OQ5mxW8uuN4rcwhxfiOsxQyJQNmc1OMuOdD8IPbjEVlz5k8pRg35yxVJoW3_wGkC3_mL8d_M2crkf5CXrw-DG_pR4kQxMLR66LwtZQe_rWZll__bGH6L0QdWqLAJCVyg-HGl1AATlNRJYp"/>
+                    <div className="absolute bottom-2 left-2 bg-black text-white px-3 py-1 text-xs font-black italic transform -rotate-2">
+                      STILL STANDING!
+                    </div>
+                  </div>
+                  <h1 className="text-slate-900 tracking-tighter text-5xl font-black leading-tight px-4 text-center pb-2 manga-skew uppercase italic text-white manga-text-stroke-thick">
+                    {level >= 10 && lives > 0 ? "VICTORY!" : "GAME OVER"}
+                  </h1>
+                  <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-2">Level Reached: {level}</p>
+                </div>
+              )}
+              {isGameOverScreen && (
+                <div className="flex flex-wrap gap-3 p-4">
+                  <div className="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-4 manga-border bg-white">
+                    <p className="text-slate-500 text-xs font-black uppercase">Final Score</p>
+                    <p className="text-[#ec5b13] tracking-tight text-3xl font-black leading-tight italic">{score}</p>
+                  </div>
+                  <div className="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-4 manga-border bg-white">
+                    <p className="text-slate-500 text-xs font-black uppercase">Highest Streak</p>
+                    <p className="text-slate-900 tracking-tight text-3xl font-black leading-tight italic">{maxStreak}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="material-symbols-outlined text-[#ec5b13] text-sm">star</span>
+                      <p className="text-[#ec5b13] text-xs font-bold leading-normal">Combo!</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className={`px-4 py-6 ${!isGameOverScreen ? 'mt-4' : ''}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-slate-900 text-lg font-black uppercase italic manga-skew bg-[#ec5b13] text-white px-4 py-1 border-2 border-black">Top Trainers</h3>
+                  <span className="text-slate-400 text-xs font-bold uppercase">Global Rank</span>
+                </div>
+                <div className="space-y-3">
+                  {isLoadingScores && highScores.length === 0 ? (
+                    <p className="text-center text-slate-500 font-bold italic py-4 animate-pulse">Loading global scores...</p>
+                  ) : highScores.length === 0 ? (
+                    <p className="text-center text-slate-500 font-bold italic py-4">No scores yet. Be the first to conquer!</p>
+                  ) : (
+                    highScores.slice(0, isGameOverScreen ? 3 : 10).map((s, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-lg manga-border-sm bg-white">
+                        <div className="flex items-center gap-3">
+                          <span className={`font-black text-xl italic w-6 ${i === 0 ? 'text-yellow-500' : i === 1 ? 'text-slate-400' : 'text-[#ec5b13]'}`}>{i+1}</span>
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-300">
+                            <span className="material-symbols-outlined text-slate-500 text-sm">
+                              {i === 0 ? 'workspace_premium' : i === 1 ? 'military_tech' : 'star'}
+                            </span>
+                          </div>
+                          <span className="font-bold text-sm truncate max-w-[120px] uppercase">{s.name}</span>
+                        </div>
+                        <span className="font-black text-sm italic">{s.score} XP</span>
+                      </div>
+                    ))
+                  )}
+                  {isGameOverScreen && !isScoreSaved && (
+                     <div className="flex items-center justify-between p-3 rounded-lg manga-border bg-[#fde047] text-black mt-2">
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-xl italic w-6">--</span>
+                        <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center border-2 border-black">
+                          <span className="material-symbols-outlined text-black text-sm">person</span>
+                        </div>
+                        <span className="font-black text-sm uppercase truncate max-w-[100px]">{playerName}</span>
+                      </div>
+                      <span className="font-black text-sm italic">{score} XP</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="p-4 mt-auto space-y-3">
+                {isGameOverScreen && !isScoreSaved ? (
+                  <div className="space-y-3">
+                    <p className="text-center font-black text-slate-500 uppercase text-sm mb-1">Trainer: <span className="text-black">{playerName}</span></p>
+                    <button onClick={() => saveScore(playerName)} className="w-full bg-[#ec5b13] text-white font-black py-4 rounded-xl manga-border-thick uppercase tracking-tighter text-xl italic active:translate-y-1 active:translate-x-1 active:shadow-none transition-all flex justify-center items-center gap-2">
+                      Save Record
+                      <span className="material-symbols-outlined font-black">save</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <button onClick={beginQuest} className="w-full bg-[#ec5b13] text-white font-black py-4 rounded-xl manga-border-thick uppercase tracking-tighter text-xl italic active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
+                      {isGameOverScreen ? 'Try Again' : 'Play Now'}
+                    </button>
+                    <button onClick={() => setGameState('menu')} className="w-full flex items-center justify-center gap-2 bg-white text-slate-900 font-black py-3 rounded-xl border-2 border-black manga-border-sm uppercase text-sm italic active:translate-y-1 transition-transform">
+                      <span className="material-symbols-outlined">home</span>
+                      Menu
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t-4 border-black bg-white px-4 pb-6 pt-3 z-50">
+                <button onClick={() => setGameState('menu')} className="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-[#ec5b13]">
+                  <span className="material-symbols-outlined">swords</span>
+                  <p className="text-[10px] font-black uppercase leading-normal tracking-wider">Quest</p>
+                </button>
+                <button onClick={() => setGameState('leaderboard')} className={`flex flex-1 flex-col items-center justify-center gap-1 ${!isGameOverScreen ? 'text-[#ec5b13]' : 'text-slate-400 hover:text-[#ec5b13]'}`}>
+                  <span className={`material-symbols-outlined ${!isGameOverScreen ? 'fill-1' : ''}`}>emoji_events</span>
+                  <p className="text-[10px] font-black uppercase leading-normal tracking-wider">Rank</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
