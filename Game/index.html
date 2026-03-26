@@ -945,21 +945,30 @@
         }
       };
 
-      const playPronunciation = (wordToSay) => {
+     const playPronunciation = (wordToSay) => {
         if (isMuted) return;
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=${encodeURIComponent(wordToSay)}`;
-        const audio = new Audio(url);
         
-        audio.play().catch(error => {
-          console.log("Google Audio blocked by browser policy, falling back to local TTS engine.");
-          if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(wordToSay);
-            utterance.lang = 'en-GB';
-            window.speechSynthesis.speak(utterance);
-          }
-        });
+        // 1. Try Native Device TTS First (100% reliable on iOS if triggered directly by click)
+        if ('speechSynthesis' in window) {
+          // iOS WebKit bug fix: sometimes the speech engine gets "stuck", canceling clears the pipe
+          window.speechSynthesis.cancel(); 
+          
+          const utterance = new SpeechSynthesisUtterance(wordToSay);
+          utterance.lang = 'en-GB';
+          // Optional: You can tweak the rate so it speaks slightly slower for kids learning
+          utterance.rate = 0.9; 
+          
+          window.speechSynthesis.speak(utterance);
+        } 
+        // 2. Fallback to Google TTS only if native isn't supported
+        else {
+          const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=${encodeURIComponent(wordToSay)}`;
+          const audio = new Audio(url);
+          audio.play().catch(error => {
+            console.log("Audio playback failed on fallback:", error);
+          });
+        }
       };
-
       const GlobalStyles = () => (
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;0,900;1,900&display=swap');
