@@ -115,7 +115,10 @@
 
       const [isMusicMuted, setIsMusicMuted] = useState(false);
       const [isSfxMuted, setIsSfxMuted] = useState(false);
+      
       const bgmRef = useRef(null);
+      const duckingTimeoutRef = useRef(null);
+      const restoreTimeoutRef = useRef(null);
 
       const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzMp36xAotY0aPKfzGzooyFnGgNiHOjQ5ivojEfaJH4VU3FQh3zX93iH78_JH2dlutu/exec';
 
@@ -199,7 +202,7 @@
       useEffect(() => {
         if (!bgmRef.current) return;
         if (gameState === 'playing' && !isMusicMuted) {
-          bgmRef.current.volume = 1.0;
+          bgmRef.current.volume = 0.7; // Base volume set to 70%
           bgmRef.current.play().catch(e => console.log("BGM autoplay prevented:", e));
         } else {
           bgmRef.current.pause();
@@ -506,32 +509,47 @@
 
       const playPronunciation = (wordToSay) => {
         if (isSfxMuted) return;
-        
-        const dipVolume = () => { if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.2; };
-        const restoreVolume = () => { if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 1.0; };
 
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel(); 
-          const utterance = new SpeechSynthesisUtterance(wordToSay);
-          utterance.lang = 'en-GB';
-          utterance.rate = 0.9; 
-          
-          utterance.onstart = dipVolume;
-          utterance.onend = restoreVolume;
-          utterance.onerror = restoreVolume;
-          
-          window.speechSynthesis.speak(utterance);
-        } else {
-          const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=${encodeURIComponent(wordToSay)}`;
-          const audio = new Audio(url);
-          audio.onplay = dipVolume;
-          audio.onended = restoreVolume;
-          audio.onerror = restoreVolume;
-          audio.play().catch(error => {
-            console.log("Audio playback failed on fallback:", error);
-            restoreVolume();
-          });
-        }
+        // Clear any existing timeouts to prevent erratic volume jumping if clicked rapidly
+        if (duckingTimeoutRef.current) clearTimeout(duckingTimeoutRef.current);
+        if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
+        
+        const dipVolume = () => { 
+          if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.2; 
+        };
+        
+        const restoreVolume = () => { 
+          restoreTimeoutRef.current = setTimeout(() => {
+            if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.7; 
+          }, 1500); // 1.5 second wait AFTER audio finishes
+        };
+
+        // Immediately dip the volume
+        dipVolume();
+
+        // Wait 1.5 seconds before playing the pronunciation
+        duckingTimeoutRef.current = setTimeout(() => {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(wordToSay);
+            utterance.lang = 'en-GB';
+            utterance.rate = 0.9; 
+            
+            utterance.onend = restoreVolume;
+            utterance.onerror = restoreVolume;
+            
+            window.speechSynthesis.speak(utterance);
+          } else {
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-GB&q=${encodeURIComponent(wordToSay)}`;
+            const audio = new Audio(url);
+            audio.onended = restoreVolume;
+            audio.onerror = restoreVolume;
+            audio.play().catch(error => {
+              console.log("Audio playback failed on fallback:", error);
+              restoreVolume();
+            });
+          }
+        }, 1500); // 1.5 second wait BEFORE audio starts
       };
 
       const GlobalStyles = () => (
@@ -829,12 +847,22 @@
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase italic mt-0.5">HP {Math.max(0, lives)}/5</span>
-                    <div className="flex gap-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className={`w-4 h-3 sm:w-5 border-2 border-black ${i < lives ? 'bg-green-500' : 'bg-slate-200'}`}></div>
-                      ))}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex gap-1 border-r-2 border-slate-200 pr-2">
+                      <button onClick={() => setIsMusicMuted(!isMusicMuted)} className={`transition ${isMusicMuted ? 'text-red-500' : 'text-slate-400 hover:text-black'}`} title="Toggle Music">
+                        <span className="material-symbols-outlined text-[18px] sm:text-[20px] block">{isMusicMuted ? 'music_off' : 'music_note'}</span>
+                      </button>
+                      <button onClick={() => setIsSfxMuted(!isSfxMuted)} className={`transition ${isSfxMuted ? 'text-red-500' : 'text-slate-400 hover:text-black'}`} title="Toggle Sound Effects">
+                        <span className="material-symbols-outlined text-[18px] sm:text-[20px] block">{isSfxMuted ? 'volume_off' : 'volume_up'}</span>
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-black uppercase italic mt-0.5 hidden sm:inline">HP {Math.max(0, lives)}/5</span>
+                      <div className="flex gap-0.5 sm:gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className={`w-3 h-3 sm:w-4 sm:h-4 border-[1.5px] sm:border-2 border-black ${i < lives ? 'bg-green-500' : 'bg-slate-200'}`}></div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
