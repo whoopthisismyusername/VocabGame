@@ -122,12 +122,37 @@
 
       const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzMp36xAotY0aPKfzGzooyFnGgNiHOjQ5ivojEfaJH4VU3FQh3zX93iH78_JH2dlutu/exec';
 
-      const fetchRandomMonster = async () => {
+      const fetchRandomMonster = async (theme) => {
         setIsLoadingMonster(true);
         try {
-          const randomId = Math.floor(Math.random() * (1025 - 906 + 1)) + 906;
-          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
-          const data = await res.json();
+          // Map the 11+ TCG Themes to standard PokeAPI types
+          const THEME_TO_TYPES = {
+            'Grass': ['grass', 'bug'],
+            'Fire': ['fire'],
+            'Water': ['water', 'ice'],
+            'Lightning': ['electric'],
+            'Psychic': ['psychic', 'ghost'],
+            'Fighting': ['fighting', 'rock', 'ground'],
+            'Darkness': ['dark', 'poison'],
+            'Metal': ['steel'],
+            'Dragon': ['dragon'],
+            'Colorless': ['normal', 'flying'],
+            'Fairy': ['fairy']
+          };
+          
+          const types = THEME_TO_TYPES[theme.name] || ['normal'];
+          const randomType = types[Math.floor(Math.random() * types.length)];
+          
+          // Fetch the list of all pokemon with this type
+          const typeRes = await fetch(`https://pokeapi.co/api/v2/type/${randomType}`);
+          const typeData = await typeRes.json();
+          const pokemonList = typeData.pokemon;
+          
+          // Select a random pokemon from that list and fetch its specific data
+          const randomPoke = pokemonList[Math.floor(Math.random() * pokemonList.length)].pokemon;
+          const pokeRes = await fetch(randomPoke.url);
+          const data = await pokeRes.json();
+
           setCurrentMonster({
             name: data.name.toUpperCase(),
             image: data.sprites.other['official-artwork'].front_default || data.sprites.front_default
@@ -202,7 +227,7 @@
       useEffect(() => {
         if (!bgmRef.current) return;
         if (gameState === 'playing' && !isMusicMuted) {
-          bgmRef.current.volume = 0.7; // Base volume set to 70%
+          bgmRef.current.volume = 0.35; // Base volume set to 35%
           bgmRef.current.play().catch(e => console.log("BGM autoplay prevented:", e));
         } else {
           bgmRef.current.pause();
@@ -300,7 +325,7 @@
         setCurrentTheme(newTheme);
 
         setGameState('vs_screen');
-        fetchRandomMonster();
+        fetchRandomMonster(newTheme);
       };
 
       const startBattle = () => {
@@ -457,7 +482,7 @@
           setCurrentTheme(newTheme);
 
           setGameState('vs_screen');
-          fetchRandomMonster();
+          fetchRandomMonster(newTheme);
         }
       };
 
@@ -515,12 +540,12 @@
         if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
         
         const dipVolume = () => { 
-          if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.2; 
+          if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.05; // Significant ducking to 5%
         };
         
         const restoreVolume = () => { 
           restoreTimeoutRef.current = setTimeout(() => {
-            if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.7; 
+            if (bgmRef.current && !isMusicMuted) bgmRef.current.volume = 0.35; // Restore to 35% standard volume
           }, 1500); // 1.5 second wait AFTER audio finishes
         };
 
